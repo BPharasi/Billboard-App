@@ -14,6 +14,9 @@ const Dashboard = ({ token, setToken }) => {
 
   const navigate = useNavigate();
 
+  // Use explicit base URL (set REACT_APP_API_URL=http://localhost:5000 in frontend/.env to avoid proxy issues)
+  const API_BASE = process.env.REACT_APP_API_URL || '';
+
   useEffect(() => {
     if (!token) {
       navigate('/admin/login');
@@ -30,12 +33,26 @@ const Dashboard = ({ token, setToken }) => {
 
   const fetchBillboards = async () => {
     try {
-      const res = await axios.get('/api/billboards', {
+      const url = `${API_BASE}/api/billboards`;
+      // debug log to help diagnose network issues
+      console.debug('Fetching billboards from', url);
+      const res = await axios.get(url, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setBillboards(res.data);
     } catch (err) {
-      alert('Error fetching billboards: ' + err.message);
+      console.error('Fetch billboards error:', err);
+      // Provide clearer message for network errors
+      if (err.message === 'Network Error') {
+        alert(
+          'Network Error: failed to reach the backend.\n' +
+          '• Is the backend running? (npm run start:server)\n' +
+          '• If using the dev proxy, ensure frontend/package.json has "proxy": "http://localhost:5000" or set REACT_APP_API_URL.\n' +
+          '• Check browser console for CORS errors or antivirus (e.g., Kaspersky) blocking requests.'
+        );
+      } else {
+        alert('Error fetching billboards: ' + (err.response?.data?.message || err.message));
+      }
     }
   };
 
