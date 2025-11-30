@@ -1,13 +1,17 @@
+/** @type {import('tailwindcss').Config} */
 module.exports = {
-  content: ["./src/**/*.{js,jsx,ts,tsx}"],
+  content: [
+    "./src/**/*.{js,jsx,ts,tsx}",
+    "./public/index.html",
+  ],
   theme: {
     extend: {
-      colors: {
-        gold: {
-          100: '#F5F5DC',
-          500: '#D4AF37',
-        },
-      },
+      // Remove or comment out custom gold colors if present
+      // colors: {
+      //   gold: {
+      //     500: '#d4af37',
+      //   },
+      // },
     },
   },
   plugins: [],

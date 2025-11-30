@@ -146,91 +146,105 @@ const Dashboard = ({ token, setToken }) => {
   };
 
   return (
-    <div className="container mx-auto p-4">
-      <h1 className="text-2xl font-bold mb-4">Admin Dashboard</h1>
-
-      <div className="mb-6 flex items-center justify-between">
-        <form onSubmit={handleCreateSubmit} className="w-full max-w-2xl bg-white p-4 rounded-lg shadow space-y-4">
-          <h2 className="text-lg font-semibold">Create New Billboard</h2>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700">Name</label>
-            <input name="name" required className="mt-1 block w-full border border-gray-300 rounded px-3 py-2" />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700">Description</label>
-            <textarea name="description" className="mt-1 block w-full border border-gray-300 rounded px-3 py-2" />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Upload Billboard Image</label>
-            <input
-              type="file"
-              accept="image/*"
-              onChange={handleImageChange}
-              className="w-full border-2 border-dashed p-4 rounded-lg focus:ring-gold-500 cursor-pointer"
-            />
-            {imagePreview && (
-              <div className="mt-3">
-                <img src={imagePreview} alt="preview" className="w-full h-48 object-cover rounded-lg" />
-              </div>
-            )}
-          </div>
-
-          <div className="flex justify-end">
-            <button type="submit" className="px-4 py-2 bg-gold-500 text-white rounded">Create Billboard</button>
-          </div>
-        </form>
-
-        <div className="ml-4">
-          <button onClick={() => openModal()} className="bg-gold-500 text-white p-2 rounded">Add / Edit in Modal</button>
+    <div className="min-h-screen bg-gray-50">
+      {/* Header with logo - Navy Blue theme */}
+      <header className="bg-blue-900 text-white shadow-md py-4 px-6 flex items-center justify-between">
+        <div className="flex items-center space-x-3">
+          {/* Logo placeholder — replace src with your actual logo path */}
+          <img src="/logo.png" alt="Logo" className="h-10 w-10" />
+          <h1 className="text-2xl font-bold">Billboard Admin</h1>
         </div>
+        <button
+          onClick={() => { setToken(null); navigate('/admin/login'); }}
+          className="px-4 py-2 bg-white text-blue-900 rounded hover:bg-gray-100 transition font-medium"
+        >
+          Logout
+        </button>
+      </header>
+
+      <div className="container mx-auto p-6">
+        <div className="mb-6">
+          <form onSubmit={handleCreateSubmit} className="max-w-2xl bg-white p-6 rounded-lg shadow-lg border border-gray-200 space-y-4">
+            <h2 className="text-lg font-semibold text-blue-900">Create New Billboard</h2>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700">Name</label>
+              <input name="name" required className="mt-1 block w-full border border-gray-300 rounded px-3 py-2 focus:ring-blue-600 focus:border-blue-600" />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700">Description</label>
+              <textarea name="description" className="mt-1 block w-full border border-gray-300 rounded px-3 py-2 focus:ring-blue-600 focus:border-blue-600" />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Upload Billboard Image</label>
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handleImageChange}
+                className="w-full border-2 border-dashed border-blue-300 p-4 rounded-lg focus:ring-blue-600 cursor-pointer hover:border-blue-600 transition"
+              />
+              {imagePreview && (
+                <div className="mt-3 relative">
+                  <img src={imagePreview} alt="preview" className="w-full h-48 object-cover rounded-lg border border-gray-200" />
+                </div>
+              )}
+            </div>
+
+            <div className="flex justify-end">
+              <button type="submit" className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition font-medium">Create Billboard</button>
+            </div>
+          </form>
+        </div>
+
+        <div className="bg-white rounded-lg shadow-lg border border-gray-200 overflow-hidden">
+          <table className="table-auto w-full">
+            <thead className="bg-blue-900 text-white border-b border-blue-800">
+              <tr>
+                <th className="p-3 text-left text-sm font-semibold">Name</th>
+                <th className="p-3 text-left text-sm font-semibold">Location</th>
+                <th className="p-3 text-left text-sm font-semibold">Price</th>
+                <th className="p-3 text-left text-sm font-semibold">Visible</th>
+                <th className="p-3 text-left text-sm font-semibold">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {billboards.map((b) => (
+                <tr key={b._id} className="hover:bg-blue-50 border-b border-gray-200">
+                  <td className="p-3 text-sm text-gray-800">{b.name}</td>
+                  <td className="p-3 text-sm text-gray-800">{b.location?.address || '—'}</td>
+                  <td className="p-3 text-sm text-gray-800">R{b.price ?? '—'}</td>
+                  <td className="p-3">
+                    <label className="relative inline-flex items-center cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={!!b.isVisible}
+                        onChange={() => toggleVisibility(b._id, b.isVisible)}
+                        className="sr-only peer"
+                      />
+                      <div className="w-11 h-6 bg-gray-300 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-blue-600 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                    </label>
+                  </td>
+                  <td className="p-3 space-x-2">
+                    <button onClick={() => openModal(b)} className="px-3 py-1 bg-blue-600 text-white text-sm rounded hover:bg-blue-700 transition font-medium">Edit</button>
+                    <button onClick={() => deleteBillboard(b._id)} className="px-3 py-1 bg-black text-white text-sm rounded hover:bg-gray-800 transition font-medium">Delete</button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+
+        {isModalOpen && (
+          <EditModal
+            billboard={selectedBillboard}
+            token={token}
+            onSave={handleSave}
+            onClose={closeModal}
+          />
+        )}
       </div>
-
-      <table className="table-auto w-full border-collapse border border-gray-300 bg-white">
-        <thead>
-          <tr className="bg-gray-100">
-            <th className="border border-gray-300 p-2">Name</th>
-            <th className="border border-gray-300 p-2">Location</th>
-            <th className="border border-gray-300 p-2">Price</th>
-            <th className="border border-gray-300 p-2">Visible</th>
-            <th className="border border-gray-300 p-2">Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {billboards.map((b) => (
-            <tr key={b._id} className="hover:bg-gray-50">
-              <td className="border border-gray-300 p-2">{b.name}</td>
-              <td className="border border-gray-300 p-2">{b.location?.address || '—'}</td>
-              <td className="border border-gray-300 p-2">R{b.price ?? '—'}</td>
-              <td className="border border-gray-300 p-2">
-                <label className="switch">
-                  <input
-                    type="checkbox"
-                    checked={!!b.isVisible}
-                    onChange={() => toggleVisibility(b._id, b.isVisible)}
-                  />
-                  <span className="slider"></span>
-                </label>
-              </td>
-              <td className="border border-gray-300 p-2">
-                <button onClick={() => openModal(b)} className="bg-blue-500 text-white px-2 py-1 rounded mr-2">Edit</button>
-                <button onClick={() => deleteBillboard(b._id)} className="bg-red-500 text-white px-2 py-1 rounded">Delete</button>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-
-      {isModalOpen && (
-        <EditModal
-          billboard={selectedBillboard}
-          token={token}
-          onSave={handleSave}
-          onClose={closeModal}
-        />
-      )}
     </div>
   );
 };

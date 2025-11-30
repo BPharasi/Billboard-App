@@ -1,7 +1,7 @@
 import React from 'react';
 import { createRoot } from 'react-dom/client';
 import App from './App';
-import './index.css';
+import './index.css'; // <-- must import for Tailwind to work
 
 // Leaflet styles required by react-leaflet
 import 'leaflet/dist/leaflet.css';

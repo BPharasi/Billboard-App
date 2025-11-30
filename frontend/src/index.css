@@ -1,3 +1,8 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Optional: add any custom global styles below */
 html,body,#root {
   height: 100%;
   margin: 0;
