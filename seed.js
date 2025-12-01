@@ -46,6 +46,19 @@ async function seedBillboards() {
             imageUrl: 'https://example.com/braamfontein1.jpg',
             isVisible: true,
             description: 'Central location billboard in Braamfontein.'
+        },
+        {
+            name: 'R24 Airport Gateway',
+            location: {
+                address: 'R24 Highway, OR Tambo International Airport Precinct, Johannesburg',
+                lat: -26.1367,
+                lng: 28.2411
+            },
+            size: 'X-Large',
+            price: 45000,
+            imageUrl: 'https://example.com/r24airport.jpg',
+            isVisible: true,
+            description: 'Prime location on R24 highway near OR Tambo International Airport entrance. High visibility for international and domestic travelers.'
         }
     ];
 

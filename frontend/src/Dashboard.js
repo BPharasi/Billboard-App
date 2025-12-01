@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import EditModal from './EditModal';
+import Header from './components/Header';
+import Footer from './components/Footer';
 
 const Dashboard = ({ token, setToken }) => {
   const [billboards, setBillboards] = useState([]);
@@ -145,24 +147,16 @@ const Dashboard = ({ token, setToken }) => {
     }
   };
 
-  return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header with logo - Navy Blue theme */}
-      <header className="bg-blue-900 text-white shadow-md py-4 px-6 flex items-center justify-between">
-        <div className="flex items-center space-x-3">
-          {/* Logo placeholder — replace src with your actual logo path */}
-          <img src="/logo.png" alt="Logo" className="h-10 w-10" />
-          <h1 className="text-2xl font-bold">Billboard Admin</h1>
-        </div>
-        <button
-          onClick={() => { setToken(null); navigate('/admin/login'); }}
-          className="px-4 py-2 bg-white text-blue-900 rounded hover:bg-gray-100 transition font-medium"
-        >
-          Logout
-        </button>
-      </header>
+  const handleLogout = () => {
+    setToken(null);
+    navigate('/admin/login');
+  };
 
-      <div className="container mx-auto p-6">
+  return (
+    <div className="min-h-screen bg-gray-50 flex flex-col">
+      <Header isAdmin={true} onLogout={handleLogout} />
+
+      <div className="flex-grow container mx-auto p-6">
         <div className="mb-6">
           <form onSubmit={handleCreateSubmit} className="max-w-2xl bg-white p-6 rounded-lg shadow-lg border border-gray-200 space-y-4">
             <h2 className="text-lg font-semibold text-blue-900">Create New Billboard</h2>
@@ -204,7 +198,6 @@ const Dashboard = ({ token, setToken }) => {
               <tr>
                 <th className="p-3 text-left text-sm font-semibold">Name</th>
                 <th className="p-3 text-left text-sm font-semibold">Location</th>
-                <th className="p-3 text-left text-sm font-semibold">Price</th>
                 <th className="p-3 text-left text-sm font-semibold">Visible</th>
                 <th className="p-3 text-left text-sm font-semibold">Actions</th>
               </tr>
@@ -214,7 +207,6 @@ const Dashboard = ({ token, setToken }) => {
                 <tr key={b._id} className="hover:bg-blue-50 border-b border-gray-200">
                   <td className="p-3 text-sm text-gray-800">{b.name}</td>
                   <td className="p-3 text-sm text-gray-800">{b.location?.address || '—'}</td>
-                  <td className="p-3 text-sm text-gray-800">R{b.price ?? '—'}</td>
                   <td className="p-3">
                     <label className="relative inline-flex items-center cursor-pointer">
                       <input
@@ -245,6 +237,8 @@ const Dashboard = ({ token, setToken }) => {
           />
         )}
       </div>
+
+      <Footer />
     </div>
   );
 };

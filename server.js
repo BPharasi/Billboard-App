@@ -122,15 +122,33 @@ function registerRoutes() {
 	app.post('/api/admin/login', async (req, res) => {
 		try {
 			const { email, password } = req.body;
+			console.log('\n=== Login Attempt ===');
+			console.log('Email received:', email);
+			console.log('Password received:', password ? '***' + password.substring(password.length - 3) : 'empty');
+			console.log('Admin model type:', Admin.constructor.name);
+			
 			const admin = await Admin.findOne({ email });
-			if (!admin) return res.status(401).json({ message: 'Invalid credentials' });
+			if (!admin) {
+				console.log('❌ Admin not found for email:', email);
+				return res.status(401).json({ message: 'Invalid credentials' });
+			}
 
+			console.log('✓ Admin found');
+			console.log('Stored hash (first 20 chars):', admin.password.substring(0, 20) + '...');
+			
 			const valid = await bcrypt.compare(password, admin.password);
-			if (!valid) return res.status(401).json({ message: 'Invalid credentials' });
+			console.log('Password comparison result:', valid);
+			
+			if (!valid) {
+				console.log('❌ Password comparison failed');
+				return res.status(401).json({ message: 'Invalid credentials' });
+			}
 
 			const token = jwt.sign({ id: admin._id, email: admin.email }, JWT_SECRET, { expiresIn: '1h' });
+			console.log('✓ Login successful, token generated\n');
 			res.json({ token });
 		} catch (err) {
+			console.error('❌ Login error:', err);
 			res.status(500).json({ message: 'Server error' });
 		}
 	});

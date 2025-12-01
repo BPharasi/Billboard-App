@@ -6,8 +6,12 @@ import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import Navbar from './Navbar';
 import Home from './Home';
-import AdminLogin from './AdminLogin';
+import AdminLogin from './components/AdminLogin';
 import Dashboard from './Dashboard';
+import About from './components/About';
+import ContactUs from './components/ContactUs';
+import LandingPage from './components/LandingPage';
+import BillboardList from './components/BillboardList';
 
 // Fix leaflet icon issue
 delete L.Icon.Default.prototype._getIconUrl;
@@ -59,7 +63,7 @@ class ErrorBoundary extends React.Component {
 // Footer
 const Footer = () => (
   <footer className="bg-gold-500 text-white p-4 text-center">
-    Johannesburg Billboard Co. - Premium Outdoor Advertising
+    HP Management - Premium Outdoor Advertising
   </footer>
 );
 
@@ -75,12 +79,15 @@ const AppContent = () => {
 
   return (
     <div className="font-sans text-gray-800 bg-gradient-to-br from-gold-100 to-gray-50 min-h-screen flex flex-col">
-      <Navbar token={token} onLogout={handleLogout} />
+      
       <main className="flex-grow">
         <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/admin/login" element={<AdminLogin />} />
-          <Route path="/admin/dashboard" element={<Dashboard />} />
+          <Route path="/" element={<LandingPage />} />
+          <Route path="/billboards" element={<BillboardList />} />
+          <Route path="/about" element={<About />} />
+          <Route path="/contact" element={<ContactUs />} />
+          <Route path="/admin/login" element={<AdminLogin setToken={setToken} />} />
+          <Route path="/admin/dashboard" element={<Dashboard token={token} setToken={setToken} />} />
         </Routes>
       </main>
       <Footer />
@@ -143,16 +150,18 @@ axios.interceptors.response.use(
 	}
 );
 
-const App = () => (
-  <AuthProvider>
-    <ErrorBoundary>
-      <BrowserRouter>
-        <UploadErrorBoundary>
-          <AppContent />
-        </UploadErrorBoundary>
-      </BrowserRouter>
-    </ErrorBoundary>
-  </AuthProvider>
-);
+function App() {
+  return (
+    <BrowserRouter>
+      <AuthProvider>
+        <ErrorBoundary>
+          <UploadErrorBoundary>
+            <AppContent />
+          </UploadErrorBoundary>
+        </ErrorBoundary>
+      </AuthProvider>
+    </BrowserRouter>
+  );
+}
 
 export default App;

@@ -2,10 +2,13 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Optional: add any custom global styles below */
-html,body,#root {
+html, body, #root {
   height: 100%;
   margin: 0;
+  padding: 0;
+}
+
+body {
   font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
-  background: #f7fafc;
+  background: #cfe5f4;
 }
