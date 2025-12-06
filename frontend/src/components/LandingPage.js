@@ -9,25 +9,16 @@ const LandingPage = () => {
       <Header isAdmin={false} />
 
       {/* Hero Section */}
-      <section className="bg-gradient-to-r from-blue-900 to-blue-700 text-white py-20">
-        <div className="container mx-auto px-6 text-center">
-          <h1 className="text-5xl font-bold mb-4">Premium Billboard Advertising</h1>
-          <p className="text-xl mb-8">Reach your audience with strategic outdoor advertising</p>
-          <div className="flex justify-center space-x-4">
-            <Link 
-              to="/billboards" 
-              className="px-8 py-4 bg-white text-blue-900 rounded-lg font-bold text-lg hover:bg-gray-100 transition shadow-lg"
-            >
-              Browse Billboards
-            </Link>
-            <Link 
-              to="/contact" 
-              className="px-8 py-4 bg-blue-600 text-white rounded-lg font-bold text-lg hover:bg-blue-500 transition border-2 border-white"
-            >
-              Contact Us
-            </Link>
-          </div>
-        </div>
+      <section className="relative h-96 bg-blue-50 flex items-center justify-center">
+        <img 
+          src={encodeURI("/Bestlocated.png")}
+          alt="Billboard advertising" 
+          className="max-w-full max-h-full object-contain"
+          onError={(e) => {
+            console.error('Failed to load image:', e.target.src);
+            e.target.style.display = 'none';
+          }}
+        />
       </section>
 
       {/* Features Section */}
