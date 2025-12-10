@@ -13,7 +13,6 @@ const jwt = require('jsonwebtoken');
 const rateLimit = require('express-rate-limit');
 const { sendContactEmail } = require('./services/emailService');
 
-// Note: do NOT require models here; they'll be set after DB connect or fallback to mocks
 let Billboard;
 let Admin;
 
@@ -43,18 +42,10 @@ app.use(limiter);
 // Middleware
 app.use(express.json());
 
-// Simple permissive CORS for development
-app.use(cors({
-  origin: true, // Allow all origins in development
-  credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization']
-}));
-
-// Update CORS configuration for production
+// Single CORS configuration (remove duplicates)
 app.use(cors({
   origin: process.env.NODE_ENV === 'production' 
-    ? [process.env.FRONTEND_URL || 'https://herpo.com']
+    ? [process.env.FRONTEND_URL, 'https://hp-management.onrender.com']
     : true,
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
@@ -69,37 +60,6 @@ app.use(helmet({
   crossOriginEmbedderPolicy: false,
   crossOriginResourcePolicy: false
 }));
-
-// Serve frontend build in production
-if (process.env.NODE_ENV === 'production') {
-	const frontendBuild = path.join(__dirname, 'frontend', 'build');
-	
-	// Check if build exists before serving
-	const fs = require('fs');
-	if (fs.existsSync(frontendBuild)) {
-		app.use(express.static(frontendBuild));
-		
-		// SPA fallback - must be LAST
-		app.get('*', (req, res, next) => {
-			if (req.path.startsWith('/api') || req.path.startsWith('/uploads')) return next();
-			res.sendFile(path.join(frontendBuild, 'index.html'));
-		});
-	} else {
-		console.warn('⚠️  Frontend build not found at:', frontendBuild);
-		console.warn('⚠️  Serving API only. Run "npm run build" to create frontend build.');
-	}
-} else {
-	// simple root route for dev so GET / doesn't 404
-	app.get('/', (req, res) => {
-		res.send('Billboard app backend (development). If you run the React dev server, open http://localhost:3000');
-	});
-
-	// respond to favicon requests to avoid noisy proxy errors from CRA dev server
-	app.get('/favicon.ico', (req, res) => {
-		// return no content so the browser stops requesting repeatedly
-		res.status(204).end();
-	});
-}
 
 // Helper to register routes after Billboard & Admin are available
 function registerRoutes() {
@@ -360,7 +320,19 @@ function registerRoutes() {
 	});
 }
 
-// Connect DB and start server
+// Serve frontend in production
+if (process.env.NODE_ENV === 'production') {
+	const frontendBuild = path.join(__dirname, 'frontend', 'build');
+	const fsSync = require('fs');
+	
+	if (fsSync.existsSync(frontendBuild)) {
+		app.use(express.static(frontendBuild));
+	} else {
+		console.error('❌ Frontend build not found!');
+	}
+}
+
+// Connect DB and start
 connectDB()
 	.then(async () => {
 		Billboard = require('./models/Billboard');
@@ -368,35 +340,26 @@ connectDB()
 
 		registerRoutes();
 
+		// Serve frontend SPA fallback AFTER routes
+		if (process.env.NODE_ENV === 'production') {
+			const frontendBuild = path.join(__dirname, 'frontend', 'build');
+			app.get('*', (req, res) => {
+				res.sendFile(path.join(frontendBuild, 'index.html'));
+			});
+		}
+
 		try {
 			const count = await Billboard.countDocuments();
-			if (count === 0) {
-				await seedBillboards();
-			}
+			if (count === 0) await seedBillboards();
 		} catch (seedErr) {
-			console.error('Seeding error (non-fatal):', seedErr);
+			console.error('Seeding error:', seedErr);
 		}
 
 		app.listen(PORT, () => {
-			console.log(`Server running on port ${PORT} (using real MongoDB)`);
+			console.log(`✅ Server running on port ${PORT}`);
 		});
 	})
 	.catch((err) => {
-		console.error('MongoDB connection error (fatal):', err.message || err);
-		
-		if (process.env.FALLBACK_TO_MOCK === 'true') {
-			console.warn('FALLBACK_TO_MOCK=true -> starting server with in-memory mock models');
-
-			Billboard = require('./mock/BillboardMock');
-			Admin = require('./mock/AdminMock');
-
-			registerRoutes();
-
-			app.listen(PORT, () => {
-				console.log(`Server running on port ${PORT} (using in-memory mock DB)`);
-			});
-			return;
-		}
-
+		console.error('MongoDB connection error:', err.message);
 		process.exit(1);
 	});
