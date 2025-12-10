@@ -111,12 +111,7 @@ const AdminLogin = ({ setToken }) => {
             </button>
           </div>
 
-          <div className="text-center text-xs text-gray-500 mt-4 space-y-1">
-            <p className="font-semibold">For MongoDB Atlas:</p>
-            <p className="font-mono">Use credentials created with create-admin.js script</p>
-            <p className="font-semibold mt-2">For Mock DB (FALLBACK_TO_MOCK=true):</p>
-            <p className="font-mono">admin@hpmanagement.com / admin123</p>
-          </div>
+          
         </form>
       </div>
     </div>
