@@ -34,8 +34,8 @@ const LandingPage = () => {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                 </svg>
               </div>
-              <h3 className="text-xl font-bold text-blue-900 mb-2">Prime Sites for your advertisements</h3>
-              <p className="text-gray-600">Strategic placements on major highways and high-traffic urban areas</p>
+              <h3 className="text-xl font-bold text-blue-900 mb-2">Prime Sites</h3>
+              <p className="text-gray-600">Our Billboards are visable and stand out above the rest</p>
             </div>
           </div>
         </div>

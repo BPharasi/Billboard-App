@@ -1,45 +1,57 @@
 require('dotenv').config();
 const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
+const readline = require('readline');
+
+const rl = readline.createInterface({
+  input: process.stdin,
+  output: process.stdout
+});
 
 const AdminSchema = new mongoose.Schema({
   email: { type: String, required: true, unique: true },
-  password: { type: String, required: true },
+  password: { type: String, required: true }
 });
-
-const Admin = mongoose.model('Admin', AdminSchema);
 
 async function createAdmin() {
   try {
     await mongoose.connect(process.env.MONGO_URI);
-    console.log('Connected to MongoDB');
+    console.log('✓ Connected to MongoDB');
 
-    const email = process.env.ADMIN_EMAIL || 'admin@herpimpo.com';
-    const password = process.env.ADMIN_PASSWORD || 'admin123';
+    const Admin = mongoose.model('Admin', AdminSchema);
 
-    // Check if admin already exists
-    const existing = await Admin.findOne({ email });
-    if (existing) {
-      console.log('Admin already exists with email:', email);
-      console.log('If you want to reset the password, delete the admin from MongoDB and run this script again.');
-      process.exit(0);
-    }
+    // Delete all existing admins
+    const deleteResult = await Admin.deleteMany({});
+    console.log(`✓ Deleted ${deleteResult.deletedCount} existing admin(s)`);
 
-    // Create new admin
-    const hashedPassword = await bcrypt.hash(password, 10);
-    const admin = new Admin({
-      email,
-      password: hashedPassword,
+    // Prompt for new admin details
+    rl.question('Enter new admin email: ', async (email) => {
+      rl.question('Enter new admin password: ', async (password) => {
+        
+        if (!email || !password) {
+          console.error('❌ Email and password are required');
+          process.exit(1);
+        }
+
+        const hashedPassword = await bcrypt.hash(password, 10);
+        
+        const newAdmin = new Admin({
+          email,
+          password: hashedPassword
+        });
+
+        await newAdmin.save();
+        console.log(`✓ New admin created successfully!`);
+        console.log(`   Email: ${email}`);
+        console.log(`   Password: [hidden]`);
+        
+        rl.close();
+        process.exit(0);
+      });
     });
 
-    await admin.save();
-    console.log('\n✓ Admin created successfully!');
-    console.log('Email:', email);
-    console.log('Password:', password);
-    console.log('\nYou can now login with these credentials.\n');
-    process.exit(0);
   } catch (error) {
-    console.error('Error creating admin:', error);
+    console.error('❌ Error:', error.message);
     process.exit(1);
   }
 }

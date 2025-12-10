@@ -2,24 +2,43 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import Header from './Header';
 import Footer from './Footer';
+import BillboardModal from './BillboardModal';
 
 const BillboardList = () => {
   const [billboards, setBillboards] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [selectedBillboard, setSelectedBillboard] = useState(null);
 
   useEffect(() => {
     fetchBillboards();
+    
+    // Set up polling - fetch billboards every 5 seconds
+    const intervalId = setInterval(() => {
+      fetchBillboards(true); // Pass true to skip loading state
+    }, 5000); // 5000ms = 5 seconds
+
+    // Cleanup interval on unmount
+    return () => clearInterval(intervalId);
   }, []);
 
-  const fetchBillboards = async () => {
+  const fetchBillboards = async (skipLoading = false) => {
     try {
+      if (!skipLoading) setLoading(true);
       const res = await axios.get('/api/billboards');
       setBillboards(res.data);
     } catch (err) {
       console.error('Error fetching billboards:', err);
     } finally {
-      setLoading(false);
+      if (!skipLoading) setLoading(false);
     }
+  };
+
+  const handleCardClick = (billboard) => {
+    setSelectedBillboard(billboard);
+  };
+
+  const closeModal = () => {
+    setSelectedBillboard(null);
   };
 
   return (
@@ -43,26 +62,39 @@ const BillboardList = () => {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {billboards.map((billboard) => (
-              <div key={billboard._id} className="bg-white rounded-lg shadow-lg border border-gray-200 overflow-hidden hover:shadow-xl transition">
-                {billboard.imagePath && (
-                  <img 
-                    src={billboard.imagePath} 
-                    alt={billboard.name}
-                    className="w-full h-48 object-cover"
-                  />
+              <div
+                key={billboard._id}
+                onClick={() => handleCardClick(billboard)}
+                className="bg-white rounded-lg shadow-lg border border-gray-200 p-6 hover:shadow-xl transition cursor-pointer hover:border-blue-300"
+              >
+                <h3 className="text-2xl font-bold text-blue-900 mb-3">{billboard.name}</h3>
+                <p className="text-gray-600 mb-4 line-clamp-3">{billboard.description}</p>
+                
+                {billboard.location?.address && (
+                  <div className="flex items-start text-gray-700 mb-4">
+                    <svg className="w-5 h-5 mr-2 mt-0.5 flex-shrink-0 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                    <span className="text-sm">{billboard.location.address}</span>
+                  </div>
                 )}
-                <div className="p-4">
-                  <h3 className="text-xl font-bold text-blue-900 mb-2">{billboard.name}</h3>
-                  <p className="text-gray-600 mb-3 line-clamp-2">{billboard.description}</p>
-                  {billboard.location?.address && (
-                    <p className="text-sm text-gray-500">📍 {billboard.location.address}</p>
-                  )}
+                
+                <div className="pt-4 border-t border-gray-200 flex items-center justify-between">
+                  <span className="text-sm text-blue-600 font-semibold">View Details</span>
+                  <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  </svg>
                 </div>
               </div>
             ))}
           </div>
         )}
       </main>
+
+      {selectedBillboard && (
+        <BillboardModal billboard={selectedBillboard} onClose={closeModal} />
+      )}
 
       <Footer />
     </div>

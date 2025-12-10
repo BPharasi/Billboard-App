@@ -11,6 +11,7 @@ const helmet = require('helmet');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const rateLimit = require('express-rate-limit');
+const { sendContactEmail } = require('./services/emailService');
 
 // Note: do NOT require models here; they'll be set after DB connect or fallback to mocks
 let Billboard;
@@ -41,42 +42,32 @@ app.use(limiter);
 
 // Middleware
 app.use(express.json());
-app.use(cors());
-app.use(helmet());
+
+// Simple permissive CORS for development
+app.use(cors({
+  origin: true, // Allow all origins in development
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
+
 app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
 
-// Configure helmet with a permissive dev-friendly CSP (adjust for production)
-app.use(
-	helmet({
-		// keep other helmet protections enabled, but add explicit CSP
-		contentSecurityPolicy: {
-			directives: {
-				defaultSrc: ["'self'"],
-				scriptSrc: ["'self'", "'unsafe-inline'"],
-				styleSrc: ["'self'", "'unsafe-inline'"],
-				imgSrc: ["'self'", 'data:'],
-				connectSrc: [
-					"'self'",
-					// allow API from dev server / backend
-					'http://localhost:5000',
-					'ws://localhost:5000',
-					// react dev server
-					'http://localhost:3000',
-					'ws://localhost:3000',
-				],
-				// adjust other directives as needed
-			},
-		},
-	})
-);
+// Simplified helmet for development
+app.use(helmet({
+  contentSecurityPolicy: false,
+  crossOriginEmbedderPolicy: false,
+  crossOriginResourcePolicy: false
+}));
 
-// Serve frontend build in production (optional)
+// Serve frontend build in production
 if (process.env.NODE_ENV === 'production') {
 	const frontendBuild = path.join(__dirname, 'frontend', 'build');
 	app.use(express.static(frontendBuild));
-	// SPA fallback
+	
+	// API and uploads should still work
+	// SPA fallback - must be LAST
 	app.get('*', (req, res, next) => {
-		// allow API and uploads to continue to their handlers
 		if (req.path.startsWith('/api') || req.path.startsWith('/uploads')) return next();
 		res.sendFile(path.join(frontendBuild, 'index.html'));
 	});
@@ -107,6 +98,19 @@ function registerRoutes() {
 			next();
 		});
 	};
+
+	// GET /api/admin/billboards (admin, all billboards including hidden) - MUST BE BEFORE /api/billboards
+	app.get('/api/admin/billboards', verifyToken, async (req, res) => {
+		try {
+			console.log('Admin fetching all billboards');
+			const billboards = await Billboard.find({});
+			console.log('Found', billboards.length, 'billboards');
+			res.json(billboards);
+		} catch (err) {
+			console.error('Error fetching admin billboards:', err);
+			res.status(500).json({ message: 'Server error' });
+		}
+	});
 
 	// GET /api/billboards (guests, only visible billboards)
 	app.get('/api/billboards', async (req, res) => {
@@ -155,31 +159,57 @@ function registerRoutes() {
 
 	// POST /api/admin/billboards (add new billboard)
 	app.post('/api/admin/billboards', verifyToken, (req, res) => {
-		upload.single('image')(req, res, async (err) => {
+		console.log('\n=== Create Billboard Request ===');
+		console.log('Body fields:', Object.keys(req.body));
+		console.log('Files count:', req.files?.length || 0);
+		
+		upload.array('images', 5)(req, res, async (err) => {
 			if (err) {
-				return res.status(400).json({ error: 'Invalid image' });
+				console.error('Upload error:', err.message);
+				return res.status(400).json({ error: err.message || 'Invalid image' });
 			}
 			try {
-				const billboard = new Billboard({
-					...req.body
-				});
-				if (req.file) {
-					billboard.imagePath = `/uploads/${req.file.filename}`;
+				console.log('Files received:', req.files?.length || 0);
+				console.log('Body after upload:', req.body);
+				
+				const billboardData = { ...req.body };
+				
+				// Parse location if it's a JSON string
+				if (billboardData.location && typeof billboardData.location === 'string') {
+					try {
+						billboardData.location = JSON.parse(billboardData.location);
+						console.log('Parsed location:', billboardData.location);
+					} catch (e) {
+						console.error('Failed to parse location:', e);
+					}
 				}
+				
+				const billboard = new Billboard(billboardData);
+				
+				// Handle multiple images
+				if (req.files && req.files.length > 0) {
+					billboard.images = req.files.map(file => `/uploads/${file.filename}`);
+					billboard.imagePath = billboard.images[0];
+					console.log('Images saved:', billboard.images);
+				} else {
+					console.warn('No files received!');
+				}
+				
 				await billboard.save();
+				console.log('Billboard created successfully:', billboard._id);
 				res.json(billboard);
 			} catch (e) {
-				console.error(e);
-				res.status(500).json({ error: 'Server error' });
+				console.error('Server error:', e);
+				res.status(500).json({ error: 'Server error: ' + e.message });
 			}
 		});
 	});
 
 	// PUT /api/admin/billboards/:id (update billboard)
 	app.put('/api/admin/billboards/:id', verifyToken, (req, res) => {
-		upload.single('image')(req, res, async (err) => {
+		upload.array('images', 5)(req, res, async (err) => {
 			if (err) {
-				return res.status(400).json({ error: 'Invalid image' });
+				return res.status(400).json({ error: err.message || 'Invalid image' });
 			}
 			try {
 				const { id } = req.params;
@@ -188,26 +218,43 @@ function registerRoutes() {
 					return res.status(404).json({ error: 'Billboard not found' });
 				}
 
+				// Update fields
 				Object.keys(req.body).forEach(key => {
-					if (req.body[key] !== undefined) {
+					if (req.body[key] !== undefined && key !== 'location' && key !== 'images') {
 						billboard[key] = req.body[key];
 					}
 				});
 
-				if (req.file) {
-					// Delete old image if present
-					if (billboard.imagePath) {
-						const oldRelative = billboard.imagePath.replace(/^\//, ''); // remove leading slash
-						const oldPath = path.join(process.cwd(), oldRelative);
-						try {
-							await fs.unlink(oldPath);
-						} catch (unlinkErr) {
-							if (unlinkErr.code !== 'ENOENT') {
-								console.error('Failed to delete old image:', unlinkErr);
+				// Parse and update location if provided
+				if (req.body.location) {
+					try {
+						const location = typeof req.body.location === 'string' 
+							? JSON.parse(req.body.location) 
+							: req.body.location;
+						billboard.location = location;
+					} catch (e) {
+						console.error('Failed to parse location:', e);
+					}
+				}
+
+				// Handle new images if uploaded
+				if (req.files && req.files.length > 0) {
+					// Delete old images if present
+					if (billboard.images && billboard.images.length > 0) {
+						for (const imgPath of billboard.images) {
+							try {
+								const oldRelative = imgPath.replace(/^\//, '');
+								const oldPath = path.join(process.cwd(), oldRelative);
+								await fs.unlink(oldPath);
+							} catch (unlinkErr) {
+								if (unlinkErr.code !== 'ENOENT') {
+									console.error('Failed to delete old image:', unlinkErr);
+								}
 							}
 						}
 					}
-					billboard.imagePath = `/uploads/${req.file.filename}`;
+					billboard.images = req.files.map(file => `/uploads/${file.filename}`);
+					billboard.imagePath = billboard.images[0];
 				}
 
 				await billboard.save();
@@ -228,25 +275,22 @@ function registerRoutes() {
 				return res.status(404).json({ error: 'Billboard not found' });
 			}
 
-			// Delete image file if exists
-			if (billboard.imagePath) {
-				try {
-					const oldRelative = billboard.imagePath.replace(/^\//, '');
-					const oldPath = path.join(process.cwd(), oldRelative);
-					await fs.unlink(oldPath);
-				} catch (unlinkErr) {
-					if (unlinkErr.code !== 'ENOENT') {
-						console.error('Failed to delete image on billboard delete:', unlinkErr);
+			// Delete images if they exist
+			if (billboard.images && billboard.images.length > 0) {
+				for (const imgPath of billboard.images) {
+					try {
+						const oldRelative = imgPath.replace(/^\//, '');
+						const oldPath = path.join(process.cwd(), oldRelative);
+						await fs.unlink(oldPath);
+					} catch (unlinkErr) {
+						if (unlinkErr.code !== 'ENOENT') {
+							console.error('Failed to delete image:', unlinkErr);
+						}
 					}
 				}
 			}
 
-			// support Mongoose doc remove or static delete
-			if (typeof billboard.remove === 'function') {
-				await billboard.remove();
-			} else if (typeof Billboard.findByIdAndDelete === 'function') {
-				await Billboard.findByIdAndDelete(id);
-			}
+			await Billboard.findByIdAndDelete(id);
 			return res.json({ message: 'Billboard deleted' });
 		} catch (err) {
 			console.error(err);
@@ -254,7 +298,39 @@ function registerRoutes() {
 		}
 	});
 
-	// Multer / upload errors handler (must be after routes)
+	// POST /api/contact (send contact form email)
+	app.post('/api/contact', async (req, res) => {
+		try {
+			const { name, email, subject, message } = req.body;
+			
+			console.log('\n=== Contact Form Submission ===');
+			console.log('From:', name, '<' + email + '>');
+			console.log('Subject:', subject);
+			
+			if (!name || !email || !subject || !message) {
+				return res.status(400).json({ error: 'All fields are required' });
+			}
+
+			await sendContactEmail(name, email, subject, message);
+			
+			console.log('✓ Contact email sent successfully\n');
+			res.json({ success: true, message: 'Email sent successfully' });
+		} catch (err) {
+			console.error('❌ Contact form error:', err.message);
+			
+			if (err.message.includes('not configured')) {
+				res.status(503).json({ 
+					error: 'Email service temporarily unavailable. Please email us directly at hermpo12@gmail.com' 
+				});
+			} else {
+				res.status(500).json({ 
+					error: 'Failed to send email. Please try again later or contact us at hermpo12@gmail.com' 
+				});
+			}
+		}
+	});
+
+	// Error handler
 	app.use((err, req, res, next) => {
 		if (err && (err.code === 'LIMIT_FILE_SIZE' || err.message === 'File too large')) {
 			return res.status(413).json({ error: 'File too large' });
@@ -267,14 +343,12 @@ function registerRoutes() {
 	});
 }
 
-// Connect once, then optionally seed and start the server
+// Connect DB and start server
 connectDB()
 	.then(async () => {
-		// real DB connected -> require real models
 		Billboard = require('./models/Billboard');
 		Admin = require('./models/Admin');
 
-		// register routes using real models
 		registerRoutes();
 
 		try {
@@ -292,27 +366,14 @@ connectDB()
 	})
 	.catch((err) => {
 		console.error('MongoDB connection error (fatal):', err.message || err);
-		// If user set FALLBACK_TO_MOCK=true, continue with in-memory mocks for development
+		
 		if (process.env.FALLBACK_TO_MOCK === 'true') {
-			console.warn('FALLBACK_TO_MOCK=true -> starting server with in-memory mock models (development only)');
+			console.warn('FALLBACK_TO_MOCK=true -> starting server with in-memory mock models');
 
 			Billboard = require('./mock/BillboardMock');
 			Admin = require('./mock/AdminMock');
 
-			// register routes using mock models
 			registerRoutes();
-
-			// Seed mock with initial data if available
-			(async () => {
-				try {
-					const count = await Billboard.countDocuments();
-					if (count === 0 && typeof seedBillboards === 'function') {
-						await seedBillboards(Billboard);
-					}
-				} catch (seedErr) {
-					console.error('Mock seeding error (non-fatal):', seedErr);
-				}
-			})();
 
 			app.listen(PORT, () => {
 				console.log(`Server running on port ${PORT} (using in-memory mock DB)`);
@@ -320,6 +381,5 @@ connectDB()
 			return;
 		}
 
-		// otherwise exit to allow fix
 		process.exit(1);
 	});

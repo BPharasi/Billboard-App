@@ -11,8 +11,8 @@ const Dashboard = ({ token, setToken }) => {
   const [selectedBillboard, setSelectedBillboard] = useState(null);
 
   // image upload/create state
-  const [selectedFile, setSelectedFile] = useState(null);
-  const [imagePreview, setImagePreview] = useState(null);
+  const [selectedFiles, setSelectedFiles] = useState([]);
+  const [imagePreviews, setImagePreviews] = useState([]);
 
   const navigate = useNavigate();
 
@@ -29,14 +29,14 @@ const Dashboard = ({ token, setToken }) => {
 
   useEffect(() => {
     return () => {
-      if (imagePreview) URL.revokeObjectURL(imagePreview);
+      imagePreviews.forEach(preview => URL.revokeObjectURL(preview));
     };
-  }, [imagePreview]);
+  }, [imagePreviews]);
 
   const fetchBillboards = async () => {
     try {
-      const url = `${API_BASE}/api/billboards`;
-      // debug log to help diagnose network issues
+      // Use admin endpoint to get ALL billboards (including hidden ones)
+      const url = `${API_BASE}/api/admin/billboards`;
       console.debug('Fetching billboards from', url);
       const res = await axios.get(url, {
         headers: { Authorization: `Bearer ${token}` },
@@ -100,15 +100,33 @@ const Dashboard = ({ token, setToken }) => {
   };
 
   const handleImageChange = (e) => {
-    const file = e.target.files && e.target.files[0];
-    if (!file) return;
-    if (file.size >= 5 * 1024 * 1024) {
-      alert('Image must be smaller than 5MB');
+    const files = Array.from(e.target.files || []);
+    if (files.length === 0) return;
+    
+    if (files.length > 5) {
+      alert('Maximum 5 images allowed');
       return;
     }
-    if (imagePreview) URL.revokeObjectURL(imagePreview);
-    setSelectedFile(file);
-    setImagePreview(URL.createObjectURL(file));
+
+    const oversized = files.find(f => f.size >= 5 * 1024 * 1024);
+    if (oversized) {
+      alert('Each image must be smaller than 5MB');
+      return;
+    }
+
+    // Clean up old previews
+    imagePreviews.forEach(preview => URL.revokeObjectURL(preview));
+    
+    setSelectedFiles(files);
+    setImagePreviews(files.map(file => URL.createObjectURL(file)));
+  };
+
+  const removeImage = (index) => {
+    const newFiles = selectedFiles.filter((_, i) => i !== index);
+    URL.revokeObjectURL(imagePreviews[index]);
+    const newPreviews = imagePreviews.filter((_, i) => i !== index);
+    setSelectedFiles(newFiles);
+    setImagePreviews(newPreviews);
   };
 
   const handleCreateSubmit = async (e) => {
@@ -117,33 +135,70 @@ const Dashboard = ({ token, setToken }) => {
       alert('Not authenticated');
       return;
     }
+    
+    // Validate required fields
+    if (selectedFiles.length === 0) {
+      alert('Please select at least one image');
+      return;
+    }
+
     try {
       const formData = new FormData();
-      // match backend naming: use 'name' and 'description' (adjust if backend expects different fields)
       formData.append('name', e.target.name.value);
-      formData.append('description', e.target.description.value);
-      if (selectedFile) {
-        formData.append('image', selectedFile);
+      formData.append('description', e.target.description.value || '');
+      
+      // Add price if provided
+      const price = e.target.price.value;
+      if (price) {
+        formData.append('price', parseFloat(price));
       }
+      
+      // Add location data
+      const address = e.target.address.value;
+      const lat = e.target.latitude.value;
+      const lng = e.target.longitude.value;
+      
+      if (address) {
+        const location = { address };
+        if (lat && lng) {
+          location.lat = parseFloat(lat);
+          location.lng = parseFloat(lng);
+        }
+        formData.append('location', JSON.stringify(location));
+      }
+      
+      // Append multiple images
+      selectedFiles.forEach((file, index) => {
+        console.log(`Appending image ${index + 1}:`, file.name, file.size);
+        formData.append('images', file);
+      });
 
-      await axios.post('/api/admin/billboards', formData, {
+      console.log('Submitting billboard with', selectedFiles.length, 'images');
+
+      const response = await axios.post('/api/admin/billboards', formData, {
         headers: {
           Authorization: `Bearer ${token}`,
           'Content-Type': 'multipart/form-data',
         },
       });
 
+      console.log('Billboard created successfully:', response.data);
+
       // refresh list and reset form / preview
       fetchBillboards();
       e.target.reset();
-      setSelectedFile(null);
-      if (imagePreview) {
-        URL.revokeObjectURL(imagePreview);
-        setImagePreview(null);
-      }
+      setSelectedFiles([]);
+      imagePreviews.forEach(preview => URL.revokeObjectURL(preview));
+      setImagePreviews([]);
+      
+      alert('Billboard created successfully!');
     } catch (err) {
-      console.error(err);
-      alert('Error creating billboard: ' + (err.response?.data?.error || err.message));
+      console.error('Error creating billboard:', err);
+      console.error('Error response:', err.response?.data);
+      console.error('Error status:', err.response?.status);
+      
+      const errorMsg = err.response?.data?.error || err.response?.data?.message || err.message;
+      alert('Error creating billboard: ' + errorMsg);
     }
   };
 
@@ -172,18 +227,93 @@ const Dashboard = ({ token, setToken }) => {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Upload Billboard Image</label>
+              <label className="block text-sm font-medium text-gray-700">Price (R/month) (optional)</label>
+              <input 
+                name="price" 
+                type="number" 
+                step="0.01"
+                placeholder="e.g., 5000"
+                className="mt-1 block w-full border border-gray-300 rounded px-3 py-2 focus:ring-blue-600 focus:border-blue-600" 
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700">Location Address *</label>
+              <input 
+                name="address" 
+                required 
+                placeholder="e.g., R24 Highway, Johannesburg"
+                className="mt-1 block w-full border border-gray-300 rounded px-3 py-2 focus:ring-blue-600 focus:border-blue-600" 
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Latitude (optional)</label>
+                <input 
+                  name="latitude" 
+                  type="number" 
+                  step="any"
+                  placeholder="e.g., -26.2041"
+                  className="mt-1 block w-full border border-gray-300 rounded px-3 py-2 focus:ring-blue-600 focus:border-blue-600" 
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Longitude (optional)</label>
+                <input 
+                  name="longitude" 
+                  type="number" 
+                  step="any"
+                  placeholder="e.g., 28.0473"
+                  className="mt-1 block w-full border border-gray-300 rounded px-3 py-2 focus:ring-blue-600 focus:border-blue-600" 
+                />
+              </div>
+            </div>
+
+            <div className="text-xs text-gray-500">
+              💡 GPS coordinates help display the exact location on the map. Leave blank to use address only.
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Upload Billboard Images (Max 5)
+              </label>
               <input
                 type="file"
                 accept="image/*"
+                multiple
                 onChange={handleImageChange}
                 className="w-full border-2 border-dashed border-blue-300 p-4 rounded-lg focus:ring-blue-600 cursor-pointer hover:border-blue-600 transition"
               />
-              {imagePreview && (
-                <div className="mt-3 relative">
-                  <img src={imagePreview} alt="preview" className="w-full h-48 object-cover rounded-lg border border-gray-200" />
+              
+              {imagePreviews.length > 0 && (
+                <div className="mt-3 grid grid-cols-2 gap-2">
+                  {imagePreviews.map((preview, index) => (
+                    <div key={index} className="relative">
+                      <img 
+                        src={preview} 
+                        alt={`preview ${index + 1}`} 
+                        className="w-full h-32 object-cover rounded-lg border border-gray-200" 
+                      />
+                      <button
+                        type="button"
+                        onClick={() => removeImage(index)}
+                        className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 hover:bg-red-600"
+                      >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                      </button>
+                      <div className="absolute bottom-1 left-1 bg-black bg-opacity-50 text-white text-xs px-2 py-1 rounded">
+                        {index + 1}
+                      </div>
+                    </div>
+                  ))}
                 </div>
               )}
+              <p className="text-xs text-gray-500 mt-1">
+                Select up to 5 images. First image will be the main display.
+              </p>
             </div>
 
             <div className="flex justify-end">

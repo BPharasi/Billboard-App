@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import axios from 'axios';
 import Header from './Header';
 import Footer from './Footer';
 
@@ -22,13 +23,18 @@ const ContactUs = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
+    setSubmitMessage('');
     
-    // Simulate form submission (replace with actual API call)
-    setTimeout(() => {
+    try {
+      await axios.post('/api/contact', formData);
       setSubmitMessage('Thank you for contacting us! We will get back to you soon.');
       setFormData({ name: '', email: '', subject: '', message: '' });
+    } catch (error) {
+      console.error('Error sending message:', error);
+      setSubmitMessage('Failed to send message. Please try again or email us directly at hermpo12@gmail.com');
+    } finally {
       setIsSubmitting(false);
-    }, 1000);
+    }
   };
 
   return (
@@ -54,7 +60,7 @@ const ContactUs = () => {
                   </svg>
                   <div>
                     <p className="font-medium text-gray-900">Phone</p>
-                    <p className="text-gray-600">(+27) 76456789</p>
+                    <p className="text-gray-600">(+27) 762016737</p>
                   </div>
                 </div>
 
