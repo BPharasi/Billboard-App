@@ -73,14 +73,21 @@ app.use(helmet({
 // Serve frontend build in production
 if (process.env.NODE_ENV === 'production') {
 	const frontendBuild = path.join(__dirname, 'frontend', 'build');
-	app.use(express.static(frontendBuild));
 	
-	// API and uploads should still work
-	// SPA fallback - must be LAST
-	app.get('*', (req, res, next) => {
-		if (req.path.startsWith('/api') || req.path.startsWith('/uploads')) return next();
-		res.sendFile(path.join(frontendBuild, 'index.html'));
-	});
+	// Check if build exists before serving
+	const fs = require('fs');
+	if (fs.existsSync(frontendBuild)) {
+		app.use(express.static(frontendBuild));
+		
+		// SPA fallback - must be LAST
+		app.get('*', (req, res, next) => {
+			if (req.path.startsWith('/api') || req.path.startsWith('/uploads')) return next();
+			res.sendFile(path.join(frontendBuild, 'index.html'));
+		});
+	} else {
+		console.warn('⚠️  Frontend build not found at:', frontendBuild);
+		console.warn('⚠️  Serving API only. Run "npm run build" to create frontend build.');
+	}
 } else {
 	// simple root route for dev so GET / doesn't 404
 	app.get('/', (req, res) => {
