@@ -4,18 +4,31 @@ const nodemailer = require('nodemailer');
 let transporter = null;
 
 if (process.env.EMAIL_USER && process.env.EMAIL_PASS) {
-  transporter = nodemailer.createTransport({
-    service: process.env.EMAIL_SERVICE || 'gmail',
-    auth: {
-      user: process.env.EMAIL_USER,
-      pass: process.env.EMAIL_PASS
-    },
-    connectionTimeout: 10000, // 10 seconds timeout
-    greetingTimeout: 10000
-  });
-
-  console.log('📧 Email service configured');
-  // REMOVED: transporter.verify() - this was causing the startup timeout
+  // Use SendGrid if no EMAIL_SERVICE specified and EMAIL_USER is 'apikey'
+  if (process.env.EMAIL_USER === 'apikey') {
+    transporter = nodemailer.createTransport({
+      host: 'smtp.sendgrid.net',
+      port: 587,
+      secure: false,
+      auth: {
+        user: 'apikey',
+        pass: process.env.EMAIL_PASS
+      }
+    });
+    console.log('📧 Email service configured (SendGrid)');
+  } else {
+    // Gmail or other service
+    transporter = nodemailer.createTransport({
+      service: process.env.EMAIL_SERVICE || 'gmail',
+      auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS
+      },
+      connectionTimeout: 10000, // 10 seconds timeout
+      greetingTimeout: 10000
+    });
+    console.log('📧 Email service configured');
+  }
 } else {
   console.warn('⚠️  Email service not configured');
 }
@@ -33,11 +46,17 @@ const sendContactEmail = async (name, email, subject, message) => {
   }
 
   if (!transporter) {
-    throw new Error('Email service not configured. Please contact administrator.');
+    console.log('\n📧 ===== EMAIL (NOT CONFIGURED) =====');
+    console.log('To:', process.env.CONTACT_EMAIL || 'hermpo12@gmail.com');
+    console.log('From:', name, '<' + email + '>');
+    console.log('Subject:', subject);
+    console.log('Message:', message);
+    console.log('==========================================\n');
+    throw new Error('Email service not configured');
   }
 
   const mailOptions = {
-    from: process.env.EMAIL_USER,
+    from: process.env.SENDGRID_FROM || process.env.EMAIL_USER,
     to: process.env.CONTACT_EMAIL || 'hermpo12@gmail.com',
     replyTo: email,
     subject: `Contact Form: ${subject}`,
