@@ -29,12 +29,15 @@ if (runtimeUri) {
 
 const app = express();
 const PORT = process.env.PORT || 5000;
-const JWT_SECRET = process.env.JWT_SECRET || 'your_jwt_secret'; // Use env var
+const JWT_SECRET = process.env.JWT_SECRET || 'your_jwt_secret';
+
+// Trust proxy for Render (fixes rate limiter error)
+app.set('trust proxy', 1);
 
 // Rate limiting
 const limiter = rateLimit({
-    windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 100, // limit each IP to 100 requests per windowMs
+    windowMs: 15 * 60 * 1000,
+    max: 100,
     message: 'Too many requests from this IP, please try again later.'
 });
 app.use(limiter);
@@ -325,10 +328,21 @@ if (process.env.NODE_ENV === 'production') {
 	const frontendBuild = path.join(__dirname, 'frontend', 'build');
 	const fsSync = require('fs');
 	
+	console.log('🔍 Checking for frontend build at:', frontendBuild);
+	
 	if (fsSync.existsSync(frontendBuild)) {
+		console.log('✅ Frontend build found, serving static files');
 		app.use(express.static(frontendBuild));
 	} else {
-		console.error('❌ Frontend build not found!');
+		console.error('❌ Frontend build NOT found at:', frontendBuild);
+		console.error('📁 Current directory:', __dirname);
+		console.error('📁 Files in current directory:');
+		try {
+			const files = fsSync.readdirSync(__dirname);
+			files.forEach(file => console.error('  -', file));
+		} catch(e) {
+			console.error('Could not list files:', e.message);
+		}
 	}
 }
 
