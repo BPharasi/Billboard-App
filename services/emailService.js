@@ -9,23 +9,18 @@ if (process.env.EMAIL_USER && process.env.EMAIL_PASS) {
     auth: {
       user: process.env.EMAIL_USER,
       pass: process.env.EMAIL_PASS
-    }
+    },
+    connectionTimeout: 10000, // 10 seconds timeout
+    greetingTimeout: 10000
   });
 
-  // Verify connection
-  transporter.verify((error, success) => {
-    if (error) {
-      console.error('❌ Email service error:', error);
-    } else {
-      console.log('✓ Email service ready');
-    }
-  });
+  console.log('📧 Email service configured (will verify on first send)');
 } else {
-  console.warn('⚠️  Email service not configured. Set EMAIL_USER and EMAIL_PASS in .env file.');
+  console.warn('⚠️  Email service not configured - set EMAIL_USER and EMAIL_PASS in environment');
 }
 
 const sendContactEmail = async (name, email, subject, message) => {
-  // Development mode: just log the email instead of sending
+  // Development mode: just log the email
   if (process.env.NODE_ENV === 'development' && !process.env.EMAIL_USER) {
     console.log('\n📧 ===== EMAIL (DEV MODE - NOT SENT) =====');
     console.log('To:', process.env.CONTACT_EMAIL || 'hermpo12@gmail.com');
@@ -58,10 +53,10 @@ const sendContactEmail = async (name, email, subject, message) => {
 
   try {
     const info = await transporter.sendMail(mailOptions);
-    console.log('✓ Email sent:', info.messageId);
+    console.log('✅ Email sent successfully:', info.messageId);
     return { success: true, messageId: info.messageId };
   } catch (error) {
-    console.error('❌ Failed to send email:', error);
+    console.error('❌ Failed to send email:', error.message);
     throw error;
   }
 };
