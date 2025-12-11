@@ -4,8 +4,33 @@ const cors = require('cors');
 const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
+const { CloudinaryStorage } = require('multer-storage-cloudinary');
+const cloudinary = require('cloudinary').v2;
+const multer = require('multer');
 
 const app = express();
+
+// Cloudinary config
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET
+});
+
+// Multer storage for Cloudinary
+const storage = new CloudinaryStorage({
+  cloudinary: cloudinary,
+  params: {
+    folder: 'billboards',
+    allowed_formats: ['jpg', 'jpeg', 'png', 'gif', 'webp'],
+    transformation: [{ width: 1920, height: 1080, crop: 'limit' }]
+  }
+});
+
+const upload = multer({
+  storage: storage,
+  limits: { fileSize: 5 * 1024 * 1024 }
+});
 
 // Environment variables from Vercel
 const MONGO_URI = process.env.MONGO_URI;
@@ -99,27 +124,62 @@ app.post('/api/admin/login', async (req, res) => {
     const token = jwt.sign({ id: admin._id, email: admin.email }, JWT_SECRET, { expiresIn: '1h' });
     res.json({ token });
   } catch (err) {
+    console.error(err);
     res.status(500).json({ message: 'Server error' });
   }
 });
 
-app.put('/api/admin/billboards/:id', verifyToken, async (req, res) => {
+app.post('/api/admin/billboards', verifyToken, upload.array('images', 5), async (req, res) => {
   try {
     await connectDB();
-    const { id } = req.params;
-    const billboard = await Billboard.findById(id);
+    const billboardData = { ...req.body };
+    
+    if (billboardData.location && typeof billboardData.location === 'string') {
+      billboardData.location = JSON.parse(billboardData.location);
+    }
+    
+    const billboard = new Billboard(billboardData);
+    
+    if (req.files && req.files.length > 0) {
+      billboard.images = req.files.map(file => file.path);
+      billboard.imagePath = billboard.images[0];
+    }
+    
+    await billboard.save();
+    res.json(billboard);
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ error: 'Server error: ' + e.message });
+  }
+});
+
+app.put('/api/admin/billboards/:id', verifyToken, upload.array('images', 5), async (req, res) => {
+  try {
+    await connectDB();
+    const billboard = await Billboard.findById(req.params.id);
     if (!billboard) return res.status(404).json({ error: 'Billboard not found' });
 
-    // Update fields
     Object.keys(req.body).forEach(key => {
-      if (req.body[key] !== undefined && key !== '_id') {
+      if (req.body[key] !== undefined && key !== 'location' && key !== 'images' && key !== '_id') {
         billboard[key] = req.body[key];
       }
     });
 
+    if (req.body.location) {
+      billboard.location = typeof req.body.location === 'string' 
+        ? JSON.parse(req.body.location) 
+        : req.body.location;
+    }
+
+    if (req.files && req.files.length > 0) {
+      billboard.images = req.files.map(file => file.path);
+      billboard.imagePath = billboard.images[0];
+    }
+
     await billboard.save();
     res.json(billboard);
   } catch (e) {
+    console.error(e);
     res.status(500).json({ error: 'Server error' });
   }
 });
@@ -146,7 +206,7 @@ app.post('/api/contact', async (req, res) => {
   
   res.json({ 
     success: true, 
-    message: 'Thank you! We\'ll contact you at ' + email + ' soon.' 
+    message: 'Thank you! We\'ll contact you soon at ' + email 
   });
 });
 

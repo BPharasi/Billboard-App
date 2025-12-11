@@ -1,5 +1,5 @@
-// Proxy disabled for Vercel deployment
-// Frontend will use /api routes directly
+// No proxy needed for production (Vercel handles routing)
+// This file is only used in development with `npm start`
 module.exports = function(app) {
-  // No proxy configuration needed for Vercel
+  // Proxy disabled - use environment variable or relative paths
 };
