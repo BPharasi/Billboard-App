@@ -21,7 +21,11 @@ L.Icon.Default.mergeOptions({
   shadowUrl: require('leaflet/dist/images/marker-shadow.png'),
 });
 
-axios.defaults.baseURL = 'http://localhost:5000';
+// Remove or comment out the hardcoded baseURL
+// axios.defaults.baseURL = 'http://localhost:5000'; // ❌ DELETE THIS LINE
+
+// Use environment variable or empty string for relative paths
+axios.defaults.baseURL = process.env.REACT_APP_API_URL || '';
 
 // AuthContext
 const AuthContext = createContext();

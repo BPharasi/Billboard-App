@@ -12,8 +12,7 @@ const BillboardList = () => {
   useEffect(() => {
     const fetchBillboards = async () => {
       try {
-        // Use relative path - works in both dev and production
-        const res = await axios.get('/api/billboards');
+        const res = await axios.get('/api/billboards'); // <-- NO localhost!
         setBillboards(res.data);
       } catch (err) {
         console.error('Error fetching billboards:', err);
