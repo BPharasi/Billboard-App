@@ -14,9 +14,10 @@ if (process.env.EMAIL_USER && process.env.EMAIL_PASS) {
     greetingTimeout: 10000
   });
 
-  console.log('📧 Email service configured (will verify on first send)');
+  console.log('📧 Email service configured');
+  // REMOVED: transporter.verify() - this was causing the startup timeout
 } else {
-  console.warn('⚠️  Email service not configured - set EMAIL_USER and EMAIL_PASS in environment');
+  console.warn('⚠️  Email service not configured');
 }
 
 const sendContactEmail = async (name, email, subject, message) => {
