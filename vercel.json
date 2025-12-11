@@ -7,11 +7,5 @@
       "source": "/api/(.*)",
       "destination": "/api"
     }
-  ],
-  "routes": [
-    {
-      "src": "/(.*)",
-      "dest": "/frontend/build/$1"
-    }
   ]
 }
