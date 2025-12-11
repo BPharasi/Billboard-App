@@ -4,7 +4,7 @@ require('dotenv').config();
 const express = require('express');
 const path = require('path');
 const fs = require('fs/promises');
-const upload = require('./middleware/upload');
+const { upload } = require('./config/cloudinary');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const helmet = require('helmet');
@@ -140,8 +140,6 @@ function registerRoutes() {
 	// POST /api/admin/billboards (add new billboard)
 	app.post('/api/admin/billboards', verifyToken, (req, res) => {
 		console.log('\n=== Create Billboard Request ===');
-		console.log('Body fields:', Object.keys(req.body));
-		console.log('Files count:', req.files?.length || 0);
 		
 		upload.array('images', 5)(req, res, async (err) => {
 			if (err) {
@@ -149,34 +147,24 @@ function registerRoutes() {
 				return res.status(400).json({ error: err.message || 'Invalid image' });
 			}
 			try {
-				console.log('Files received:', req.files?.length || 0);
-				console.log('Body after upload:', req.body);
-				
 				const billboardData = { ...req.body };
 				
 				// Parse location if it's a JSON string
 				if (billboardData.location && typeof billboardData.location === 'string') {
-					try {
-						billboardData.location = JSON.parse(billboardData.location);
-						console.log('Parsed location:', billboardData.location);
-					} catch (e) {
-						console.error('Failed to parse location:', e);
-					}
+					billboardData.location = JSON.parse(billboardData.location);
 				}
 				
 				const billboard = new Billboard(billboardData);
 				
-				// Handle multiple images
+				// Handle Cloudinary uploaded images
 				if (req.files && req.files.length > 0) {
-					billboard.images = req.files.map(file => `/uploads/${file.filename}`);
+					// Cloudinary files have .path property with the URL
+					billboard.images = req.files.map(file => file.path);
 					billboard.imagePath = billboard.images[0];
-					console.log('Images saved:', billboard.images);
-				} else {
-					console.warn('No files received!');
+					console.log('Images uploaded to Cloudinary:', billboard.images);
 				}
 				
 				await billboard.save();
-				console.log('Billboard created successfully:', billboard._id);
 				res.json(billboard);
 			} catch (e) {
 				console.error('Server error:', e);
@@ -207,33 +195,28 @@ function registerRoutes() {
 
 				// Parse and update location if provided
 				if (req.body.location) {
-					try {
-						const location = typeof req.body.location === 'string' 
-							? JSON.parse(req.body.location) 
-							: req.body.location;
-						billboard.location = location;
-					} catch (e) {
-						console.error('Failed to parse location:', e);
-					}
+					const location = typeof req.body.location === 'string' 
+						? JSON.parse(req.body.location) 
+						: req.body.location;
+					billboard.location = location;
 				}
 
-				// Handle new images if uploaded
+				// Handle new Cloudinary images if uploaded
 				if (req.files && req.files.length > 0) {
-					// Delete old images if present
+					// Delete old images from Cloudinary (optional)
 					if (billboard.images && billboard.images.length > 0) {
-						for (const imgPath of billboard.images) {
+						const { cloudinary } = require('./config/cloudinary');
+						for (const imgUrl of billboard.images) {
 							try {
-								const oldRelative = imgPath.replace(/^\//, '');
-								const oldPath = path.join(process.cwd(), oldRelative);
-								await fs.unlink(oldPath);
-							} catch (unlinkErr) {
-								if (unlinkErr.code !== 'ENOENT') {
-									console.error('Failed to delete old image:', unlinkErr);
-								}
+								// Extract public_id from Cloudinary URL
+								const publicId = imgUrl.split('/').slice(-2).join('/').split('.')[0];
+								await cloudinary.uploader.destroy(publicId);
+							} catch (delErr) {
+								console.error('Failed to delete old Cloudinary image:', delErr);
 							}
 						}
 					}
-					billboard.images = req.files.map(file => `/uploads/${file.filename}`);
+					billboard.images = req.files.map(file => file.path);
 					billboard.imagePath = billboard.images[0];
 				}
 
@@ -255,17 +238,15 @@ function registerRoutes() {
 				return res.status(404).json({ error: 'Billboard not found' });
 			}
 
-			// Delete images if they exist
+			// Delete images from Cloudinary
 			if (billboard.images && billboard.images.length > 0) {
-				for (const imgPath of billboard.images) {
+				const { cloudinary } = require('./config/cloudinary');
+				for (const imgUrl of billboard.images) {
 					try {
-						const oldRelative = imgPath.replace(/^\//, '');
-						const oldPath = path.join(process.cwd(), oldRelative);
-						await fs.unlink(oldPath);
-					} catch (unlinkErr) {
-						if (unlinkErr.code !== 'ENOENT') {
-							console.error('Failed to delete image:', unlinkErr);
-						}
+						const publicId = imgUrl.split('/').slice(-2).join('/').split('.')[0];
+						await cloudinary.uploader.destroy(publicId);
+					} catch (delErr) {
+						console.error('Failed to delete Cloudinary image:', delErr);
 					}
 				}
 			}

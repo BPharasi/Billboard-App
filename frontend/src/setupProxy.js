@@ -1,2 +1,5 @@
-// Proxy only used in development
-// Production uses REACT_APP_API_URL instead
+// Proxy disabled for Vercel deployment
+// Frontend will use /api routes directly
+module.exports = function(app) {
+  // No proxy configuration needed for Vercel
+};
