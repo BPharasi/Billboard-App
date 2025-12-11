@@ -10,6 +10,7 @@ const AdminLogin = ({ setToken }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
+      // Use relative path
       const res = await axios.post('/api/admin/login', { email, password });
       const token = res.data.token;
       localStorage.setItem('token', token);

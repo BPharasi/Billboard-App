@@ -10,28 +10,17 @@ const BillboardList = () => {
   const [selectedBillboard, setSelectedBillboard] = useState(null);
 
   useEffect(() => {
+    const fetchBillboards = async () => {
+      try {
+        // Use relative path - works in both dev and production
+        const res = await axios.get('/api/billboards');
+        setBillboards(res.data);
+      } catch (err) {
+        console.error('Error fetching billboards:', err);
+      }
+    };
     fetchBillboards();
-    
-    // Set up polling - fetch billboards every 5 seconds
-    const intervalId = setInterval(() => {
-      fetchBillboards(true); // Pass true to skip loading state
-    }, 5000); // 5000ms = 5 seconds
-
-    // Cleanup interval on unmount
-    return () => clearInterval(intervalId);
   }, []);
-
-  const fetchBillboards = async (skipLoading = false) => {
-    try {
-      if (!skipLoading) setLoading(true);
-      const res = await axios.get('/api/billboards');
-      setBillboards(res.data);
-    } catch (err) {
-      console.error('Error fetching billboards:', err);
-    } finally {
-      if (!skipLoading) setLoading(false);
-    }
-  };
 
   const handleCardClick = (billboard) => {
     setSelectedBillboard(billboard);
