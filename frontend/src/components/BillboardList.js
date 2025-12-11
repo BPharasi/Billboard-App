@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import BillboardCard from './BillboardCard';
 import Header from './Header';
 import Footer from './Footer';
-import BillboardModal from './BillboardModal';
 
 const BillboardList = () => {
   const [billboards, setBillboards] = useState([]);
