@@ -7,6 +7,7 @@ const jwt = require('jsonwebtoken');
 const { CloudinaryStorage } = require('multer-storage-cloudinary');
 const cloudinary = require('cloudinary').v2;
 const multer = require('multer');
+const nodemailer = require('nodemailer');
 
 const app = express();
 
@@ -88,6 +89,19 @@ const verifyToken = (req, res, next) => {
     next();
   });
 };
+
+// Email transporter setup
+let transporter = null;
+if (process.env.EMAIL_USER && process.env.EMAIL_PASS) {
+  transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+      user: process.env.EMAIL_USER,
+      pass: process.env.EMAIL_PASS
+    }
+  });
+  console.log('📧 Email service configured');
+}
 
 // Routes
 app.get('/api/billboards', async (req, res) => {
@@ -201,13 +215,39 @@ app.post('/api/contact', async (req, res) => {
     return res.status(400).json({ error: 'All fields are required' });
   }
 
-  // Log contact form submission
   console.log('📧 Contact form:', { name, email, subject, message });
   
-  res.json({ 
-    success: true, 
-    message: 'Thank you! We\'ll contact you soon at ' + email 
-  });
+  // Actually send the email
+  if (transporter) {
+    try {
+      await transporter.sendMail({
+        from: process.env.EMAIL_USER,
+        to: process.env.CONTACT_EMAIL || 'hermpo12@gmail.com',
+        replyTo: email,
+        subject: `Contact Form: ${subject}`,
+        html: `
+          <h2>New Contact Form Submission</h2>
+          <p><strong>From:</strong> ${name}</p>
+          <p><strong>Email:</strong> ${email}</p>
+          <p><strong>Subject:</strong> ${subject}</p>
+          <hr>
+          <p><strong>Message:</strong></p>
+          <p>${message.replace(/\n/g, '<br>')}</p>
+        `
+      });
+      console.log('✅ Email sent successfully');
+      res.json({ success: true, message: 'Thank you! We\'ll contact you soon.' });
+    } catch (error) {
+      console.error('❌ Email send failed:', error);
+      res.status(500).json({ error: 'Failed to send email. Please try emailing us directly at hermpo12@gmail.com' });
+    }
+  } else {
+    console.log('⚠️ Email service not configured');
+    res.json({ 
+      success: true, 
+      message: 'Thank you! We\'ll contact you at ' + email + ' soon.' 
+    });
+  }
 });
 
 // For Vercel, export the Express app
