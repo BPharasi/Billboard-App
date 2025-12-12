@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import BillboardCard from './BillboardCard';
+import BillboardModal from './BillboardModal';
 import Header from './Header';
 import Footer from './Footer';
 
@@ -57,7 +58,11 @@ const BillboardList = () => {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {billboards.map((billboard) => (
-              <BillboardCard key={billboard._id} billboard={billboard} />
+              <BillboardCard 
+                key={billboard._id} 
+                billboard={billboard} 
+                onClick={() => handleCardClick(billboard)}
+              />
             ))}
           </div>
         )}
