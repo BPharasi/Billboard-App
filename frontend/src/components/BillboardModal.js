@@ -22,6 +22,35 @@ const BillboardModal = ({ billboard, onClose }) => {
     ? [billboard.location.lat, billboard.location.lng]
     : [-26.2041, 28.0473]; // Default Johannesburg center
 
+  // Function to open map in external app
+  const openInMaps = () => {
+    const { lat, lng, address } = billboard.location;
+    
+    // Check if we have coordinates
+    if (lat && lng) {
+      // Try to detect iOS for Apple Maps, otherwise use Google Maps
+      const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+      
+      if (isIOS) {
+        // Apple Maps
+        window.open(`maps://maps.apple.com/?q=${lat},${lng}&ll=${lat},${lng}`, '_blank');
+      } else {
+        // Google Maps
+        window.open(`https://www.google.com/maps/search/?api=1&query=${lat},${lng}`, '_blank');
+      }
+    } else if (address) {
+      // Fallback to address search if no coordinates
+      const encodedAddress = encodeURIComponent(address);
+      const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+      
+      if (isIOS) {
+        window.open(`maps://maps.apple.com/?q=${encodedAddress}`, '_blank');
+      } else {
+        window.open(`https://www.google.com/maps/search/?api=1&query=${encodedAddress}`, '_blank');
+      }
+    }
+  };
+
   return (
     <div className="fixed inset-0 bg-black bg-opacity-75 z-50 flex items-center justify-center p-4">
       <div className="relative bg-white rounded-lg w-full max-w-6xl h-5/6 flex flex-col">
@@ -84,13 +113,27 @@ const BillboardModal = ({ billboard, onClose }) => {
             )}
 
             {/* Map View - Bottom Right Corner */}
-            <div className="absolute bottom-4 right-4 w-64 h-48 rounded-lg overflow-hidden shadow-lg border-2 border-white">
+            <div 
+              className="absolute bottom-4 right-4 w-64 h-48 rounded-lg overflow-hidden shadow-lg border-2 border-white cursor-pointer group"
+              onClick={openInMaps}
+            >
+              {/* Overlay hint on hover */}
+              <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 transition-all z-10 flex items-center justify-center">
+                <div className="opacity-0 group-hover:opacity-100 transition-opacity bg-white rounded-lg px-3 py-2 text-sm font-medium text-gray-900 shadow-lg">
+                  <svg className="w-5 h-5 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                  </svg>
+                  Open in Maps
+                </div>
+              </div>
+
               {hasCoordinates ? (
                 <MapContainer
                   center={mapCenter}
                   zoom={15}
                   style={{ height: '100%', width: '100%' }}
                   scrollWheelZoom={false}
+                  zoomControl={false}
                 >
                   <TileLayer
                     url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
@@ -101,14 +144,13 @@ const BillboardModal = ({ billboard, onClose }) => {
                   </Marker>
                 </MapContainer>
               ) : (
-                // Show message when no GPS coordinates
                 <div className="h-full w-full bg-gray-200 flex items-center justify-center p-4">
                   <div className="text-center">
                     <svg className="w-12 h-12 mx-auto text-gray-400 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                     </svg>
-                    <p className="text-xs text-gray-600">GPS coordinates not available</p>
+                    <p className="text-xs text-gray-600">Click to search address</p>
                   </div>
                 </div>
               )}

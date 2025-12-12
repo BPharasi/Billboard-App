@@ -204,7 +204,7 @@ const Dashboard = ({ token, setToken }) => {
 
   const handleLogout = () => {
     setToken(null);
-    navigate('/admin/login');
+    navigate('/'); // Changed from '/admin/login' to '/'
   };
 
   return (
