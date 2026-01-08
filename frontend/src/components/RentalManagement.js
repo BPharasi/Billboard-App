@@ -1027,7 +1027,9 @@ const RentalManagement = ({ token, setToken }) => {
                     <div>
                       <label className="text-sm font-medium text-gray-600">Analytics Notes</label>
                       <p className="text-gray-900 whitespace-pre-line">{viewingRental.serviceDetails?.analyticsNotes || '—'}</p>
-                      {/* Milestones */}
+                    </div>
+
+                    {/* Milestones */}
                     {viewingRental.serviceDetails?.milestones && viewingRental.serviceDetails.milestones.length > 0 && (
                         <div>
                           <label className="text-sm font-medium text-gray-600 block mb-2">Milestones & Deliverables</label>
@@ -1046,8 +1048,8 @@ const RentalManagement = ({ token, setToken }) => {
                           </div>
                         </div>
                       )}
-                    </div>
-                  </section>
+                  </div>
+                </section>
 
                 {/* Payment Terms */}
                 <section className="border-b pb-4">
