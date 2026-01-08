@@ -5,6 +5,14 @@ import 'leaflet/dist/leaflet.css';
 const BillboardModal = ({ billboard, onClose }) => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
+  // Debug: Log billboard data to check if size and type are present
+  console.log('Billboard data in modal:', {
+    name: billboard.name,
+    size: billboard.size,
+    type: billboard.type,
+    fullData: billboard
+  });
+
   // Handle multiple images - if only one image, use it in an array
   const images = billboard.images || (billboard.imagePath ? [billboard.imagePath] : []);
 
