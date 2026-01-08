@@ -589,65 +589,62 @@ const RentalManagement = ({ token, setToken }) => {
                 </section>
 
                 {/* Detailed Client Information */}
-                {viewingRental.clientDetails && (
-                  <section className="border-b pb-4">
-                    <h3 className="text-lg font-semibold text-gray-800 mb-3">Legal & Registration Details</h3>
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <label className="text-sm font-medium text-gray-600">Full Legal Name</label>
-                        <p className="text-gray-900">{viewingRental.clientDetails.legalName || '—'}</p>
-                      </div>
-                      <div>
-                        <label className="text-sm font-medium text-gray-600">Business Registration Number (CIPC)</label>
-                        <p className="text-gray-900">{viewingRental.clientDetails.businessRegNumber || '—'}</p>
-                      </div>
-                      <div>
-                        <label className="text-sm font-medium text-gray-600">Unique Client ID</label>
-                        <p className="text-gray-900 font-mono">{viewingRental.clientDetails.uniqueClientId || '—'}</p>
-                      </div>
+                <section className="border-b pb-4">
+                  <h3 className="text-lg font-semibold text-gray-800 mb-3">Legal & Registration Details</h3>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="text-sm font-medium text-gray-600">Full Legal Name</label>
+                      <p className="text-gray-900">{viewingRental.clientDetails?.legalName || '—'}</p>
                     </div>
-                    <div className="grid grid-cols-2 gap-4 mt-4">
-                      <div>
-                        <label className="text-sm font-medium text-gray-600">Physical Address</label>
-                        <p className="text-gray-900 whitespace-pre-line">{viewingRental.clientDetails.physicalAddress || '—'}</p>
-                      </div>
-                      <div>
-                        <label className="text-sm font-medium text-gray-600">Postal Address</label>
-                        <p className="text-gray-900 whitespace-pre-line">{viewingRental.clientDetails.postalAddress || '—'}</p>
-                      </div>
+                    <div>
+                      <label className="text-sm font-medium text-gray-600">Business Registration Number (CIPC)</label>
+                      <p className="text-gray-900">{viewingRental.clientDetails?.businessRegNumber || '—'}</p>
                     </div>
+                    <div>
+                      <label className="text-sm font-medium text-gray-600">Unique Client ID</label>
+                      <p className="text-gray-900 font-mono">{viewingRental.clientDetails?.uniqueClientId || '—'}</p>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4 mt-4">
+                    <div>
+                      <label className="text-sm font-medium text-gray-600">Physical Address</label>
+                      <p className="text-gray-900 whitespace-pre-line">{viewingRental.clientDetails?.physicalAddress || '—'}</p>
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-gray-600">Postal Address</label>
+                      <p className="text-gray-900 whitespace-pre-line">{viewingRental.clientDetails?.postalAddress || '—'}</p>
+                    </div>
+                  </div>
 
-                    {/* Representatives */}
-                    {viewingRental.clientDetails.representatives && viewingRental.clientDetails.representatives.length > 0 && (
-                      <div className="mt-4">
-                        <label className="text-sm font-medium text-gray-600 block mb-2">Key Representatives</label>
-                        <div className="space-y-2">
-                          {viewingRental.clientDetails.representatives.map((rep, idx) => (
-                            <div key={idx} className="bg-gray-50 p-3 rounded">
-                              <p className="font-medium">{rep.name} {rep.position && `- ${rep.position}`}</p>
-                              <p className="text-sm text-gray-600">{rep.email} {rep.phone && `• ${rep.phone}`}</p>
-                            </div>
-                          ))}
-                        </div>
+                  {/* Representatives */}
+                  {viewingRental.clientDetails?.representatives && viewingRental.clientDetails.representatives.length > 0 && (
+                    <div className="mt-4">
+                      <label className="text-sm font-medium text-gray-600 block mb-2">Key Representatives</label>
+                      <div className="space-y-2">
+                        {viewingRental.clientDetails.representatives.map((rep, idx) => (
+                          <div key={idx} className="bg-gray-50 p-3 rounded">
+                            <p className="font-medium">{rep.name} {rep.position && `- ${rep.position}`}</p>
+                            <p className="text-sm text-gray-600">{rep.email} {rep.phone && `• ${rep.phone}`}</p>
+                          </div>
+                        ))}
                       </div>
-                    )}
-                  </section>
-                )}
+                    </div>
+                  )}
+                </section>
 
                 {/* Service Details */}
-                {viewingRental.serviceDetails && (
-                  <section className="border-b pb-4">
-                    <h3 className="text-lg font-semibold text-gray-800 mb-3">Service Description</h3>
-                    <div className="space-y-3">
+                <section className="border-b pb-4">
+                  <h3 className="text-lg font-semibold text-gray-800 mb-3">Service Description</h3>
+                  <div className="space-y-3">
+                    <div>
+                      <label className="text-sm font-medium text-gray-600">Billboard Locations (GPS/Address)</label>
+                      <p className="text-gray-900 whitespace-pre-line">{viewingRental.serviceDetails?.billboardLocations || '—'}</p>
+                    </div>
+                    <div className="grid grid-cols-3 gap-4">
                       <div>
-                        <label className="text-sm font-medium text-gray-600">Billboard Locations (GPS/Address)</label>
-                        <p className="text-gray-900 whitespace-pre-line">{viewingRental.serviceDetails.billboardLocations || '—'}</p>
+                        <label className="text-sm font-medium text-gray-600">Sizes</label>
+                        <p className="text-gray-900">{viewingRental.serviceDetails?.billboardSizes || '—'}</p>
                       </div>
-                      <div className="grid grid-cols-3 gap-4">
-                        <div>
-                          <label className="text-sm font-medium text-gray-600">Sizes</label>
-                          <p className="text-gray-900">{viewingRental.serviceDetails.billboardSizes || '—'}</p>
-                        </div>
                         <div>
                           <label className="text-sm font-medium text-gray-600">Types</label>
                           <p className="text-gray-900">{viewingRental.serviceDetails.billboardTypes || '—'}</p>
@@ -699,13 +696,11 @@ const RentalManagement = ({ token, setToken }) => {
                       )}
                     </div>
                   </section>
-                )}
 
                 {/* Payment Terms */}
-                {viewingRental.paymentTerms && (
-                  <section className="border-b pb-4">
-                    <h3 className="text-lg font-semibold text-gray-800 mb-3">Payment Terms</h3>
-                    <div className="grid grid-cols-2 gap-4">
+                <section className="border-b pb-4">
+                  <h3 className="text-lg font-semibold text-gray-800 mb-3">Payment Terms</h3>
+                  <div className="grid grid-cols-2 gap-4">
                       <div>
                         <label className="text-sm font-medium text-gray-600">Total Cost</label>
                         <p className="text-gray-900 text-xl font-bold">
@@ -745,13 +740,13 @@ const RentalManagement = ({ token, setToken }) => {
                         <label className="text-sm font-medium text-gray-600">Escalation Clause</label>
                         <p className="text-gray-900 whitespace-pre-line">{viewingRental.paymentTerms.escalationClause || '—'}</p>
                       </div>
-                      {viewingRental.paymentTerms.invoiceNumbers && viewingRental.paymentTerms.invoiceNumbers.length > 0 && (
+                      {viewingRental.paymentTerms?.invoiceNumbers && viewingRental.paymentTerms.invoiceNumbers.length > 0 && (
                         <div>
                           <label className="text-sm font-medium text-gray-600">Invoice Numbers</label>
                           <p className="text-gray-900 font-mono">{viewingRental.paymentTerms.invoiceNumbers.join(', ')}</p>
                         </div>
                       )}
-                      {viewingRental.paymentTerms.paymentIds && viewingRental.paymentTerms.paymentIds.length > 0 && (
+                      {viewingRental.paymentTerms?.paymentIds && viewingRental.paymentTerms.paymentIds.length > 0 && (
                         <div>
                           <label className="text-sm font-medium text-gray-600">Payment IDs</label>
                           <p className="text-gray-900 font-mono">{viewingRental.paymentTerms.paymentIds.join(', ')}</p>
@@ -759,7 +754,6 @@ const RentalManagement = ({ token, setToken }) => {
                       )}
                     </div>
                   </section>
-                )}
 
                 {/* Contract Information */}
                 <section>
