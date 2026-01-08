@@ -530,6 +530,360 @@ const RentalManagement = ({ token, setToken }) => {
                   />
                 </div>
 
+                {/* Advanced Details Toggle */}
+                <div className="border-t border-gray-200 pt-4">
+                  <button
+                    type="button"
+                    onClick={() => setShowAdvanced(!showAdvanced)}
+                    className="flex items-center justify-between w-full px-4 py-3 bg-gray-50 hover:bg-gray-100 rounded-lg transition"
+                  >
+                    <span className="text-sm font-semibold text-gray-700">
+                      📋 Advanced Details (Optional)
+                    </span>
+                    <svg
+                      className={`w-5 h-5 text-gray-600 transition-transform ${showAdvanced ? 'rotate-180' : ''}`}
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </button>
+                </div>
+
+                {/* Advanced Details Section */}
+                {showAdvanced && (
+                  <div className="space-y-6 border border-gray-200 rounded-lg p-4 bg-gray-50">
+                    
+                    {/* Client Details Section */}
+                    <div className="bg-white rounded-lg p-4 border border-gray-200">
+                      <h3 className="text-md font-semibold text-gray-800 mb-4 flex items-center">
+                        <span className="mr-2">🏢</span> Legal & Registration Details
+                      </h3>
+                      
+                      <div className="space-y-4">
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700">Legal Company Name</label>
+                            <input
+                              type="text"
+                              name="clientDetails.legalName"
+                              value={formData['clientDetails.legalName']}
+                              onChange={handleChange}
+                              placeholder="Full registered business name"
+                              className="mt-1 block w-full border border-gray-300 rounded px-3 py-2 text-sm"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700">Business Registration Number</label>
+                            <input
+                              type="text"
+                              name="clientDetails.businessRegNumber"
+                              value={formData['clientDetails.businessRegNumber']}
+                              onChange={handleChange}
+                              placeholder="Company reg number"
+                              className="mt-1 block w-full border border-gray-300 rounded px-3 py-2 text-sm"
+                            />
+                          </div>
+                        </div>
+
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700">Unique Client ID</label>
+                          <input
+                            type="text"
+                            name="clientDetails.uniqueClientId"
+                            value={formData['clientDetails.uniqueClientId']}
+                            onChange={handleChange}
+                            placeholder="Internal client reference number"
+                            className="mt-1 block w-full border border-gray-300 rounded px-3 py-2 text-sm"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700">Physical Address</label>
+                          <textarea
+                            name="clientDetails.physicalAddress"
+                            value={formData['clientDetails.physicalAddress']}
+                            onChange={handleChange}
+                            rows="2"
+                            placeholder="Street address, city, postal code"
+                            className="mt-1 block w-full border border-gray-300 rounded px-3 py-2 text-sm"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700">Postal Address</label>
+                          <textarea
+                            name="clientDetails.postalAddress"
+                            value={formData['clientDetails.postalAddress']}
+                            onChange={handleChange}
+                            rows="2"
+                            placeholder="P.O. Box or postal address"
+                            className="mt-1 block w-full border border-gray-300 rounded px-3 py-2 text-sm"
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Service Details Section */}
+                    <div className="bg-white rounded-lg p-4 border border-gray-200">
+                      <h3 className="text-md font-semibold text-gray-800 mb-4 flex items-center">
+                        <span className="mr-2">📊</span> Service Description
+                      </h3>
+                      
+                      <div className="space-y-4">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700">Billboard Locations (GPS/Address)</label>
+                          <textarea
+                            name="serviceDetails.billboardLocations"
+                            value={formData['serviceDetails.billboardLocations']}
+                            onChange={handleChange}
+                            rows="2"
+                            placeholder="e.g., -26.123, 28.456 or Main St & 5th Ave"
+                            className="mt-1 block w-full border border-gray-300 rounded px-3 py-2 text-sm"
+                          />
+                        </div>
+
+                        <div className="grid grid-cols-3 gap-4">
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700">Billboard Sizes</label>
+                            <input
+                              type="text"
+                              name="serviceDetails.billboardSizes"
+                              value={formData['serviceDetails.billboardSizes']}
+                              onChange={handleChange}
+                              placeholder="e.g., 6m x 3m"
+                              className="mt-1 block w-full border border-gray-300 rounded px-3 py-2 text-sm"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700">Billboard Types</label>
+                            <input
+                              type="text"
+                              name="serviceDetails.billboardTypes"
+                              value={formData['serviceDetails.billboardTypes']}
+                              onChange={handleChange}
+                              placeholder="e.g., Digital, Static"
+                              className="mt-1 block w-full border border-gray-300 rounded px-3 py-2 text-sm"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700">Expected Impressions</label>
+                            <input
+                              type="number"
+                              name="serviceDetails.expectedImpressions"
+                              value={formData['serviceDetails.expectedImpressions']}
+                              onChange={handleChange}
+                              placeholder="Monthly views"
+                              className="mt-1 block w-full border border-gray-300 rounded px-3 py-2 text-sm"
+                            />
+                          </div>
+                        </div>
+
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700">Additional Services</label>
+                          <textarea
+                            name="serviceDetails.additionalServices"
+                            value={formData['serviceDetails.additionalServices']}
+                            onChange={handleChange}
+                            rows="2"
+                            placeholder="e.g., Installation, maintenance, design services"
+                            className="mt-1 block w-full border border-gray-300 rounded px-3 py-2 text-sm"
+                          />
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700">Artwork Requirements</label>
+                            <textarea
+                              name="serviceDetails.artworkRequirements"
+                              value={formData['serviceDetails.artworkRequirements']}
+                              onChange={handleChange}
+                              rows="2"
+                              placeholder="File formats, resolution, specifications"
+                              className="mt-1 block w-full border border-gray-300 rounded px-3 py-2 text-sm"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700">Approval Process</label>
+                            <textarea
+                              name="serviceDetails.approvalProcess"
+                              value={formData['serviceDetails.approvalProcess']}
+                              onChange={handleChange}
+                              rows="2"
+                              placeholder="Steps for content approval"
+                              className="mt-1 block w-full border border-gray-300 rounded px-3 py-2 text-sm"
+                            />
+                          </div>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700">Content Restrictions</label>
+                            <textarea
+                              name="serviceDetails.contentRestrictions"
+                              value={formData['serviceDetails.contentRestrictions']}
+                              onChange={handleChange}
+                              rows="2"
+                              placeholder="Prohibited content or themes"
+                              className="mt-1 block w-full border border-gray-300 rounded px-3 py-2 text-sm"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700">Analytics Notes</label>
+                            <textarea
+                              name="serviceDetails.analyticsNotes"
+                              value={formData['serviceDetails.analyticsNotes']}
+                              onChange={handleChange}
+                              rows="2"
+                              placeholder="Reporting requirements, KPIs"
+                              className="mt-1 block w-full border border-gray-300 rounded px-3 py-2 text-sm"
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Payment Terms Section */}
+                    <div className="bg-white rounded-lg p-4 border border-gray-200">
+                      <h3 className="text-md font-semibold text-gray-800 mb-4 flex items-center">
+                        <span className="mr-2">💰</span> Payment Terms
+                      </h3>
+                      
+                      <div className="space-y-4">
+                        <div className="grid grid-cols-3 gap-4">
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700">Total Cost</label>
+                            <input
+                              type="number"
+                              name="paymentTerms.totalCost"
+                              value={formData['paymentTerms.totalCost']}
+                              onChange={handleChange}
+                              step="0.01"
+                              placeholder="Full contract value"
+                              className="mt-1 block w-full border border-gray-300 rounded px-3 py-2 text-sm"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700">Currency</label>
+                            <select
+                              name="paymentTerms.currency"
+                              value={formData['paymentTerms.currency']}
+                              onChange={handleChange}
+                              className="mt-1 block w-full border border-gray-300 rounded px-3 py-2 text-sm"
+                            >
+                              <option value="ZAR">ZAR (R)</option>
+                              <option value="USD">USD ($)</option>
+                              <option value="EUR">EUR (€)</option>
+                              <option value="GBP">GBP (£)</option>
+                            </select>
+                          </div>
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700">Tax Rate (%)</label>
+                            <input
+                              type="number"
+                              name="paymentTerms.taxRate"
+                              value={formData['paymentTerms.taxRate']}
+                              onChange={handleChange}
+                              step="0.01"
+                              placeholder="15"
+                              className="mt-1 block w-full border border-gray-300 rounded px-3 py-2 text-sm"
+                            />
+                          </div>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700">Deposit Amount</label>
+                            <input
+                              type="number"
+                              name="paymentTerms.depositAmount"
+                              value={formData['paymentTerms.depositAmount']}
+                              onChange={handleChange}
+                              step="0.01"
+                              placeholder="Required upfront deposit"
+                              className="mt-1 block w-full border border-gray-300 rounded px-3 py-2 text-sm"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700">Payment Method</label>
+                            <input
+                              type="text"
+                              name="paymentTerms.paymentMethod"
+                              value={formData['paymentTerms.paymentMethod']}
+                              onChange={handleChange}
+                              placeholder="e.g., EFT, Credit Card, Cash"
+                              className="mt-1 block w-full border border-gray-300 rounded px-3 py-2 text-sm"
+                            />
+                          </div>
+                        </div>
+
+                        <div className="flex items-center">
+                          <input
+                            type="checkbox"
+                            name="paymentTerms.depositPaid"
+                            checked={formData['paymentTerms.depositPaid']}
+                            onChange={(e) => setFormData(prev => ({ ...prev, 'paymentTerms.depositPaid': e.target.checked }))}
+                            className="h-4 w-4 text-blue-600 border-gray-300 rounded"
+                          />
+                          <label className="ml-2 text-sm font-medium text-gray-700">
+                            Deposit has been paid
+                          </label>
+                        </div>
+
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700">Cost Breakdown</label>
+                          <textarea
+                            name="paymentTerms.costBreakdown"
+                            value={formData['paymentTerms.costBreakdown']}
+                            onChange={handleChange}
+                            rows="3"
+                            placeholder="Itemized costs (e.g., Billboard rental: R5000, Installation: R1000)"
+                            className="mt-1 block w-full border border-gray-300 rounded px-3 py-2 text-sm"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700">Payment Schedule</label>
+                          <textarea
+                            name="paymentTerms.paymentSchedule"
+                            value={formData['paymentTerms.paymentSchedule']}
+                            onChange={handleChange}
+                            rows="2"
+                            placeholder="e.g., 50% upfront, 50% on completion OR Monthly on 1st of each month"
+                            className="mt-1 block w-full border border-gray-300 rounded px-3 py-2 text-sm"
+                          />
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700">Late Payment Penalty</label>
+                            <input
+                              type="text"
+                              name="paymentTerms.latePaymentPenalty"
+                              value={formData['paymentTerms.latePaymentPenalty']}
+                              onChange={handleChange}
+                              placeholder="e.g., 2% per week"
+                              className="mt-1 block w-full border border-gray-300 rounded px-3 py-2 text-sm"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700">Escalation Clause</label>
+                            <input
+                              type="text"
+                              name="paymentTerms.escalationClause"
+                              value={formData['paymentTerms.escalationClause']}
+                              onChange={handleChange}
+                              placeholder="e.g., Annual 5% increase"
+                              className="mt-1 block w-full border border-gray-300 rounded px-3 py-2 text-sm"
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
                 <div className="flex justify-end space-x-3 pt-4">
                   <button
                     type="button"
@@ -647,36 +1001,34 @@ const RentalManagement = ({ token, setToken }) => {
                       </div>
                         <div>
                           <label className="text-sm font-medium text-gray-600">Types</label>
-                          <p className="text-gray-900">{viewingRental.serviceDetails.billboardTypes || '—'}</p>
-                        </div>
-                        <div>
-                          <label className="text-sm font-medium text-gray-600">Expected Impressions</label>
-                          <p className="text-gray-900">{viewingRental.serviceDetails.expectedImpressions?.toLocaleString() || '—'}</p>
+                        <p className="text-gray-900">{viewingRental.serviceDetails?.billboardTypes || '—'}</p>
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium text-gray-600">Expected Impressions</label>
+                        <p className="text-gray-900">{viewingRental.serviceDetails?.expectedImpressions?.toLocaleString() || '—'}</p>
                         </div>
                       </div>
                       <div>
                         <label className="text-sm font-medium text-gray-600">Additional Services</label>
-                        <p className="text-gray-900 whitespace-pre-line">{viewingRental.serviceDetails.additionalServices || '—'}</p>
-                      </div>
-                      <div>
-                        <label className="text-sm font-medium text-gray-600">Artwork Requirements</label>
-                        <p className="text-gray-900 whitespace-pre-line">{viewingRental.serviceDetails.artworkRequirements || '—'}</p>
+                      <p className="text-gray-900 whitespace-pre-line">{viewingRental.serviceDetails?.additionalServices || '—'}</p>
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-gray-600">Artwork Requirements</label>
+                      <p className="text-gray-900 whitespace-pre-line">{viewingRental.serviceDetails?.artworkRequirements || '—'}</p>
                       </div>
                       <div>
                         <label className="text-sm font-medium text-gray-600">Approval Process</label>
-                        <p className="text-gray-900 whitespace-pre-line">{viewingRental.serviceDetails.approvalProcess || '—'}</p>
-                      </div>
-                      <div>
-                        <label className="text-sm font-medium text-gray-600">Content Restrictions</label>
-                        <p className="text-gray-900 whitespace-pre-line">{viewingRental.serviceDetails.contentRestrictions || '—'}</p>
-                      </div>
-                      <div>
-                        <label className="text-sm font-medium text-gray-600">Analytics Notes</label>
-                        <p className="text-gray-900 whitespace-pre-line">{viewingRental.serviceDetails.analyticsNotes || '—'}</p>
-                      </div>
-
+                      <p className="text-gray-900 whitespace-pre-line">{viewingRental.serviceDetails?.approvalProcess || '—'}</p>
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-gray-600">Content Restrictions</label>
+                      <p className="text-gray-900 whitespace-pre-line">{viewingRental.serviceDetails?.contentRestrictions || '—'}</p>
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-gray-600">Analytics Notes</label>
+                      <p className="text-gray-900 whitespace-pre-line">{viewingRental.serviceDetails?.analyticsNotes || '—'}</p>
                       {/* Milestones */}
-                      {viewingRental.serviceDetails.milestones && viewingRental.serviceDetails.milestones.length > 0 && (
+                    {viewingRental.serviceDetails?.milestones && viewingRental.serviceDetails.milestones.length > 0 && (
                         <div>
                           <label className="text-sm font-medium text-gray-600 block mb-2">Milestones & Deliverables</label>
                           <div className="space-y-2">
@@ -704,41 +1056,41 @@ const RentalManagement = ({ token, setToken }) => {
                       <div>
                         <label className="text-sm font-medium text-gray-600">Total Cost</label>
                         <p className="text-gray-900 text-xl font-bold">
-                          {viewingRental.paymentTerms.currency || 'ZAR'} {viewingRental.paymentTerms.totalCost?.toLocaleString() || viewingRental.totalAmount?.toLocaleString()}
-                        </p>
-                      </div>
-                      <div>
-                        <label className="text-sm font-medium text-gray-600">Tax Rate (VAT)</label>
-                        <p className="text-gray-900">{viewingRental.paymentTerms.taxRate || 15}%</p>
+                        {viewingRental.paymentTerms?.currency || 'ZAR'} {viewingRental.paymentTerms?.totalCost?.toLocaleString() || viewingRental.totalAmount?.toLocaleString()}
+                      </p>
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-gray-600">Tax Rate (VAT)</label>
+                      <p className="text-gray-900">{viewingRental.paymentTerms?.taxRate || 15}%</p>
                       </div>
                       <div>
                         <label className="text-sm font-medium text-gray-600">Deposit Amount</label>
                         <p className="text-gray-900">
-                          {viewingRental.paymentTerms.depositAmount?.toLocaleString() || '—'}
-                          {viewingRental.paymentTerms.depositPaid && <span className="ml-2 text-green-600 font-medium">✓ Paid</span>}
-                        </p>
-                      </div>
-                      <div>
-                        <label className="text-sm font-medium text-gray-600">Payment Method</label>
-                        <p className="text-gray-900">{viewingRental.paymentTerms.paymentMethod || '—'}</p>
+                        {viewingRental.paymentTerms?.depositAmount?.toLocaleString() || '—'}
+                        {viewingRental.paymentTerms?.depositPaid && <span className="ml-2 text-green-600 font-medium">✓ Paid</span>}
+                      </p>
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-gray-600">Payment Method</label>
+                      <p className="text-gray-900">{viewingRental.paymentTerms?.paymentMethod || '—'}</p>
                       </div>
                     </div>
                     <div className="mt-4 space-y-3">
                       <div>
                         <label className="text-sm font-medium text-gray-600">Cost Breakdown</label>
-                        <p className="text-gray-900 whitespace-pre-line">{viewingRental.paymentTerms.costBreakdown || '—'}</p>
+                        <p className="text-gray-900 whitespace-pre-line">{viewingRental.paymentTerms?.costBreakdown || '—'}</p>
                       </div>
                       <div>
                         <label className="text-sm font-medium text-gray-600">Payment Schedule</label>
-                        <p className="text-gray-900 whitespace-pre-line">{viewingRental.paymentTerms.paymentSchedule || '—'}</p>
+                        <p className="text-gray-900 whitespace-pre-line">{viewingRental.paymentTerms?.paymentSchedule || '—'}</p>
                       </div>
                       <div>
                         <label className="text-sm font-medium text-gray-600">Late Payment Penalty</label>
-                        <p className="text-gray-900">{viewingRental.paymentTerms.latePaymentPenalty || '—'}</p>
+                        <p className="text-gray-900">{viewingRental.paymentTerms?.latePaymentPenalty || '—'}</p>
                       </div>
                       <div>
                         <label className="text-sm font-medium text-gray-600">Escalation Clause</label>
-                        <p className="text-gray-900 whitespace-pre-line">{viewingRental.paymentTerms.escalationClause || '—'}</p>
+                        <p className="text-gray-900 whitespace-pre-line">{viewingRental.paymentTerms?.escalationClause || '—'}</p>
                       </div>
                       {viewingRental.paymentTerms?.invoiceNumbers && viewingRental.paymentTerms.invoiceNumbers.length > 0 && (
                         <div>
