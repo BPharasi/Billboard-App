@@ -159,6 +159,12 @@ const Dashboard = ({ token, setToken }) => {
         formData.append('size', size);
       }
       
+      // Add type if provided
+      const type = e.target.type.value;
+      if (type) {
+        formData.append('type', type);
+      }
+      
       // Add location data
       const address = e.target.address.value;
       const lat = e.target.latitude.value;
@@ -249,6 +255,16 @@ const Dashboard = ({ token, setToken }) => {
                 name="size" 
                 type="text"
                 placeholder="e.g., 6m x 3m"
+                className="mt-1 block w-full border border-gray-300 rounded px-3 py-2 focus:ring-blue-600 focus:border-blue-600" 
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700">Type (optional)</label>
+              <input 
+                name="type" 
+                type="text"
+                placeholder="e.g., Digital, Static, LED"
                 className="mt-1 block w-full border border-gray-300 rounded px-3 py-2 focus:ring-blue-600 focus:border-blue-600" 
               />
             </div>

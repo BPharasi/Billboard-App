@@ -10,6 +10,7 @@ const EditModal = ({ billboard, token, onSave, onClose }) => {
     longitude: '',
     price: '',
     size: '',
+    type: '',
     isVisible: true
   });
   const [selectedFiles, setSelectedFiles] = useState([]);
@@ -25,6 +26,7 @@ const EditModal = ({ billboard, token, onSave, onClose }) => {
         longitude: billboard.location?.lng || '',
         price: billboard.price || '',
         size: billboard.size || '',
+        type: billboard.type || '',
         isVisible: billboard.isVisible ?? true
       });
       
@@ -82,6 +84,11 @@ const EditModal = ({ billboard, token, onSave, onClose }) => {
       // Add size if provided
       if (formData.size) {
         submitData.append('size', formData.size);
+      }
+
+      // Add type if provided
+      if (formData.type) {
+        submitData.append('type', formData.type);
       }
 
       // Add location data
@@ -187,6 +194,18 @@ const EditModal = ({ billboard, token, onSave, onClose }) => {
               value={formData.size}
               onChange={handleChange}
               placeholder="e.g., 6m x 3m"
+              className="mt-1 block w-full border border-gray-300 rounded px-3 py-2 focus:ring-blue-600 focus:border-blue-600"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700">Type</label>
+            <input
+              type="text"
+              name="type"
+              value={formData.type}
+              onChange={handleChange}
+              placeholder="e.g., Digital, Static, LED"
               className="mt-1 block w-full border border-gray-300 rounded px-3 py-2 focus:ring-blue-600 focus:border-blue-600"
             />
           </div>

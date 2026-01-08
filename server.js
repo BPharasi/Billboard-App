@@ -149,6 +149,12 @@ function registerRoutes() {
 			try {
 				const billboardData = { ...req.body };
 				
+				console.log('Received billboard data:', { 
+					name: billboardData.name, 
+					price: billboardData.price, 
+					size: billboardData.size 
+				});
+				
 				// Parse location if it's a JSON string
 				if (billboardData.location && typeof billboardData.location === 'string') {
 					billboardData.location = JSON.parse(billboardData.location);
@@ -185,6 +191,12 @@ function registerRoutes() {
 				if (!billboard) {
 					return res.status(404).json({ error: 'Billboard not found' });
 				}
+
+				console.log('Updating billboard with data:', { 
+					name: req.body.name, 
+					price: req.body.price, 
+					size: req.body.size 
+				});
 
 				// Update fields
 				Object.keys(req.body).forEach(key => {
