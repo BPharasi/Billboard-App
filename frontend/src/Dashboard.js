@@ -153,6 +153,12 @@ const Dashboard = ({ token, setToken }) => {
         formData.append('price', parseFloat(price));
       }
       
+      // Add size if provided
+      const size = e.target.size.value;
+      if (size) {
+        formData.append('size', size);
+      }
+      
       // Add location data
       const address = e.target.address.value;
       const lat = e.target.latitude.value;
@@ -233,6 +239,16 @@ const Dashboard = ({ token, setToken }) => {
                 type="number" 
                 step="0.01"
                 placeholder="e.g., 5000"
+                className="mt-1 block w-full border border-gray-300 rounded px-3 py-2 focus:ring-blue-600 focus:border-blue-600" 
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700">Size (optional)</label>
+              <input 
+                name="size" 
+                type="text"
+                placeholder="e.g., 6m x 3m"
                 className="mt-1 block w-full border border-gray-300 rounded px-3 py-2 focus:ring-blue-600 focus:border-blue-600" 
               />
             </div>

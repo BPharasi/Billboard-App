@@ -37,7 +37,7 @@ const sendContactEmail = async (name, email, subject, message) => {
   // Development mode: just log the email
   if (process.env.NODE_ENV === 'development' && !process.env.EMAIL_USER) {
     console.log('\n📧 ===== EMAIL (DEV MODE - NOT SENT) =====');
-    console.log('To:', process.env.CONTACT_EMAIL || 'hermpo12@gmail.com');
+    console.log('To:', process.env.CONTACT_EMAIL || 'info@hermpo.com');
     console.log('From:', name, '<' + email + '>');
     console.log('Subject:', subject);
     console.log('Message:', message);
@@ -47,7 +47,7 @@ const sendContactEmail = async (name, email, subject, message) => {
 
   if (!transporter) {
     console.log('\n📧 ===== EMAIL (NOT CONFIGURED) =====');
-    console.log('To:', process.env.CONTACT_EMAIL || 'hermpo12@gmail.com');
+    console.log('To:', process.env.CONTACT_EMAIL || 'info@hermpo.com');
     console.log('From:', name, '<' + email + '>');
     console.log('Subject:', subject);
     console.log('Message:', message);
@@ -57,7 +57,7 @@ const sendContactEmail = async (name, email, subject, message) => {
 
   const mailOptions = {
     from: process.env.SENDGRID_FROM || process.env.EMAIL_USER,
-    to: process.env.CONTACT_EMAIL || 'hermpo12@gmail.com',
+    to: process.env.CONTACT_EMAIL || 'info@hermpo.com',
     replyTo: email,
     subject: `Contact Form: ${subject}`,
     html: `
