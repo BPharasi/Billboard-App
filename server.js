@@ -202,12 +202,15 @@ function registerRoutes() {
 					name: req.body.name, 
 					price: req.body.price, 
 					size: req.body.size,
-					type: req.body.type
+					type: req.body.type,
+					allKeys: Object.keys(req.body),
+					fullBody: req.body
 				});
 
 				// Update fields
 				Object.keys(req.body).forEach(key => {
 					if (req.body[key] !== undefined && key !== 'location' && key !== 'images') {
+						console.log(`Setting billboard.${key} = ${req.body[key]}`);
 						billboard[key] = req.body[key];
 					}
 				});
@@ -240,6 +243,12 @@ function registerRoutes() {
 				}
 
 				await billboard.save();
+				console.log('✅ Billboard saved successfully:', {
+					id: billboard._id,
+					name: billboard.name,
+					size: billboard.size,
+					type: billboard.type
+				});
 				res.json(billboard);
 			} catch (e) {
 				console.error(e);
