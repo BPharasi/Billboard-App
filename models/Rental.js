@@ -6,23 +6,77 @@ const rentalSchema = new mongoose.Schema({
         ref: 'Billboard', 
         required: true 
     },
+    
+    // Basic Client Info
     clientName: { type: String, required: true },
     clientEmail: { type: String, required: true },
     clientPhone: { type: String },
     clientCompany: { type: String },
+    
+    // Detailed Client Information
+    clientDetails: {
+        legalName: { type: String },
+        businessRegNumber: { type: String },
+        physicalAddress: { type: String },
+        postalAddress: { type: String },
+        uniqueClientId: { type: String },
+        representatives: [{
+            name: { type: String },
+            position: { type: String },
+            phone: { type: String },
+            email: { type: String }
+        }]
+    },
+    
+    // Service Description
+    serviceDetails: {
+        billboardLocations: { type: String },
+        billboardSizes: { type: String },
+        billboardTypes: { type: String },
+        additionalServices: { type: String },
+        artworkRequirements: { type: String },
+        approvalProcess: { type: String },
+        contentRestrictions: { type: String },
+        expectedImpressions: { type: Number },
+        visibilityReports: { type: String },
+        analyticsNotes: { type: String },
+        milestones: [{
+            description: { type: String },
+            date: { type: Date },
+            completed: { type: Boolean, default: false }
+        }]
+    },
+    
+    // Payment Terms
+    paymentTerms: {
+        totalCost: { type: Number },
+        costBreakdown: { type: String },
+        paymentSchedule: { type: String },
+        depositAmount: { type: Number },
+        depositPaid: { type: Boolean, default: false },
+        paymentMethod: { type: String },
+        latePaymentPenalty: { type: String },
+        taxRate: { type: Number, default: 15 },
+        currency: { type: String, default: 'ZAR' },
+        escalationClause: { type: String },
+        invoiceNumbers: [{ type: String }],
+        paymentIds: [{ type: String }]
+    },
+    
+    // Contract Dates and Status
     startDate: { type: Date, required: true },
     endDate: { type: Date, required: true },
-    contractDuration: { type: Number, required: true }, // in months
+    contractDuration: { type: Number, required: true },
     monthlyRate: { type: Number, required: true },
     totalAmount: { type: Number, required: true },
-    contractPDF: { type: String }, // URL to uploaded contract
+    contractPDF: { type: String },
     status: { 
         type: String, 
         enum: ['active', 'expired', 'upcoming', 'cancelled'],
         default: 'active'
     },
     remindersSent: [{
-        type: { type: String }, // e.g., '6_months', '3_months', '1_month', '1_week'
+        type: { type: String },
         sentAt: { type: Date, default: Date.now }
     }],
     notes: { type: String }

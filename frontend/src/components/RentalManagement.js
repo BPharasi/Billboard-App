@@ -8,8 +8,11 @@ const RentalManagement = ({ token, setToken }) => {
   const [rentals, setRentals] = useState([]);
   const [billboards, setBillboards] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isClientDetailsOpen, setIsClientDetailsOpen] = useState(false);
   const [selectedRental, setSelectedRental] = useState(null);
+  const [viewingRental, setViewingRental] = useState(null);
   const [contractFile, setContractFile] = useState(null);
+  const [showAdvanced, setShowAdvanced] = useState(false);
   const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
@@ -21,7 +24,35 @@ const RentalManagement = ({ token, setToken }) => {
     startDate: '',
     endDate: '',
     monthlyRate: '',
-    notes: ''
+    notes: '',
+    // Client Details
+    'clientDetails.legalName': '',
+    'clientDetails.businessRegNumber': '',
+    'clientDetails.physicalAddress': '',
+    'clientDetails.postalAddress': '',
+    'clientDetails.uniqueClientId': '',
+    // Service Details
+    'serviceDetails.billboardLocations': '',
+    'serviceDetails.billboardSizes': '',
+    'serviceDetails.billboardTypes': '',
+    'serviceDetails.additionalServices': '',
+    'serviceDetails.artworkRequirements': '',
+    'serviceDetails.approvalProcess': '',
+    'serviceDetails.contentRestrictions': '',
+    'serviceDetails.expectedImpressions': '',
+    'serviceDetails.visibilityReports': '',
+    'serviceDetails.analyticsNotes': '',
+    // Payment Terms
+    'paymentTerms.totalCost': '',
+    'paymentTerms.costBreakdown': '',
+    'paymentTerms.paymentSchedule': '',
+    'paymentTerms.depositAmount': '',
+    'paymentTerms.depositPaid': false,
+    'paymentTerms.paymentMethod': '',
+    'paymentTerms.latePaymentPenalty': '',
+    'paymentTerms.taxRate': 15,
+    'paymentTerms.currency': 'ZAR',
+    'paymentTerms.escalationClause': ''
   });
 
   useEffect(() => {
@@ -167,6 +198,16 @@ const RentalManagement = ({ token, setToken }) => {
     setContractFile(null);
   };
 
+  const openClientDetails = (rental) => {
+    setViewingRental(rental);
+    setIsClientDetailsOpen(true);
+  };
+
+  const closeClientDetails = () => {
+    setIsClientDetailsOpen(false);
+    setViewingRental(null);
+  };
+
   const deleteRental = async (id) => {
     if (window.confirm('Are you sure you want to delete this rental?')) {
       try {
@@ -291,8 +332,13 @@ const RentalManagement = ({ token, setToken }) => {
                     <td className="p-3 text-sm text-gray-800">
                       {rental.billboard?.name || 'N/A'}
                     </td>
-                    <td className="p-3 text-sm text-gray-800">
-                      <div>{rental.clientName}</div>
+                    <td className="p-3 text-sm">
+                      <button
+                        onClick={() => openClientDetails(rental)}
+                        className="text-blue-600 hover:text-blue-800 hover:underline font-medium text-left"
+                      >
+                        {rental.clientName}
+                      </button>
                       <div className="text-xs text-gray-500">{rental.clientEmail}</div>
                     </td>
                     <td className="p-3 text-sm text-gray-800">{rental.clientCompany || '—'}</td>
@@ -500,6 +546,271 @@ const RentalManagement = ({ token, setToken }) => {
                   </button>
                 </div>
               </form>
+            </div>
+          </div>
+        )}
+
+        {/* Client Details Modal */}
+        {isClientDetailsOpen && viewingRental && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-lg shadow-xl w-full max-w-4xl max-h-[90vh] overflow-y-auto">
+              <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex justify-between items-center">
+                <h2 className="text-2xl font-bold text-blue-900">Client & Contract Details</h2>
+                <button
+                  onClick={closeClientDetails}
+                  className="text-gray-500 hover:text-gray-700 text-2xl"
+                >
+                  ×
+                </button>
+              </div>
+
+              <div className="p-6 space-y-6">
+                {/* Basic Client Information */}
+                <section className="border-b pb-4">
+                  <h3 className="text-lg font-semibold text-gray-800 mb-3">Basic Information</h3>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="text-sm font-medium text-gray-600">Client Name</label>
+                      <p className="text-gray-900">{viewingRental.clientName}</p>
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-gray-600">Company</label>
+                      <p className="text-gray-900">{viewingRental.clientCompany || '—'}</p>
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-gray-600">Email</label>
+                      <p className="text-gray-900">{viewingRental.clientEmail}</p>
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-gray-600">Phone</label>
+                      <p className="text-gray-900">{viewingRental.clientPhone || '—'}</p>
+                    </div>
+                  </div>
+                </section>
+
+                {/* Detailed Client Information */}
+                {viewingRental.clientDetails && (
+                  <section className="border-b pb-4">
+                    <h3 className="text-lg font-semibold text-gray-800 mb-3">Legal & Registration Details</h3>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <label className="text-sm font-medium text-gray-600">Full Legal Name</label>
+                        <p className="text-gray-900">{viewingRental.clientDetails.legalName || '—'}</p>
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium text-gray-600">Business Registration Number (CIPC)</label>
+                        <p className="text-gray-900">{viewingRental.clientDetails.businessRegNumber || '—'}</p>
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium text-gray-600">Unique Client ID</label>
+                        <p className="text-gray-900 font-mono">{viewingRental.clientDetails.uniqueClientId || '—'}</p>
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-2 gap-4 mt-4">
+                      <div>
+                        <label className="text-sm font-medium text-gray-600">Physical Address</label>
+                        <p className="text-gray-900 whitespace-pre-line">{viewingRental.clientDetails.physicalAddress || '—'}</p>
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium text-gray-600">Postal Address</label>
+                        <p className="text-gray-900 whitespace-pre-line">{viewingRental.clientDetails.postalAddress || '—'}</p>
+                      </div>
+                    </div>
+
+                    {/* Representatives */}
+                    {viewingRental.clientDetails.representatives && viewingRental.clientDetails.representatives.length > 0 && (
+                      <div className="mt-4">
+                        <label className="text-sm font-medium text-gray-600 block mb-2">Key Representatives</label>
+                        <div className="space-y-2">
+                          {viewingRental.clientDetails.representatives.map((rep, idx) => (
+                            <div key={idx} className="bg-gray-50 p-3 rounded">
+                              <p className="font-medium">{rep.name} {rep.position && `- ${rep.position}`}</p>
+                              <p className="text-sm text-gray-600">{rep.email} {rep.phone && `• ${rep.phone}`}</p>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </section>
+                )}
+
+                {/* Service Details */}
+                {viewingRental.serviceDetails && (
+                  <section className="border-b pb-4">
+                    <h3 className="text-lg font-semibold text-gray-800 mb-3">Service Description</h3>
+                    <div className="space-y-3">
+                      <div>
+                        <label className="text-sm font-medium text-gray-600">Billboard Locations (GPS/Address)</label>
+                        <p className="text-gray-900 whitespace-pre-line">{viewingRental.serviceDetails.billboardLocations || '—'}</p>
+                      </div>
+                      <div className="grid grid-cols-3 gap-4">
+                        <div>
+                          <label className="text-sm font-medium text-gray-600">Sizes</label>
+                          <p className="text-gray-900">{viewingRental.serviceDetails.billboardSizes || '—'}</p>
+                        </div>
+                        <div>
+                          <label className="text-sm font-medium text-gray-600">Types</label>
+                          <p className="text-gray-900">{viewingRental.serviceDetails.billboardTypes || '—'}</p>
+                        </div>
+                        <div>
+                          <label className="text-sm font-medium text-gray-600">Expected Impressions</label>
+                          <p className="text-gray-900">{viewingRental.serviceDetails.expectedImpressions?.toLocaleString() || '—'}</p>
+                        </div>
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium text-gray-600">Additional Services</label>
+                        <p className="text-gray-900 whitespace-pre-line">{viewingRental.serviceDetails.additionalServices || '—'}</p>
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium text-gray-600">Artwork Requirements</label>
+                        <p className="text-gray-900 whitespace-pre-line">{viewingRental.serviceDetails.artworkRequirements || '—'}</p>
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium text-gray-600">Approval Process</label>
+                        <p className="text-gray-900 whitespace-pre-line">{viewingRental.serviceDetails.approvalProcess || '—'}</p>
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium text-gray-600">Content Restrictions</label>
+                        <p className="text-gray-900 whitespace-pre-line">{viewingRental.serviceDetails.contentRestrictions || '—'}</p>
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium text-gray-600">Analytics Notes</label>
+                        <p className="text-gray-900 whitespace-pre-line">{viewingRental.serviceDetails.analyticsNotes || '—'}</p>
+                      </div>
+
+                      {/* Milestones */}
+                      {viewingRental.serviceDetails.milestones && viewingRental.serviceDetails.milestones.length > 0 && (
+                        <div>
+                          <label className="text-sm font-medium text-gray-600 block mb-2">Milestones & Deliverables</label>
+                          <div className="space-y-2">
+                            {viewingRental.serviceDetails.milestones.map((milestone, idx) => (
+                              <div key={idx} className="bg-gray-50 p-3 rounded flex justify-between items-center">
+                                <div>
+                                  <p className="font-medium">{milestone.description}</p>
+                                  <p className="text-sm text-gray-600">{new Date(milestone.date).toLocaleDateString()}</p>
+                                </div>
+                                <span className={`px-2 py-1 text-xs rounded ${milestone.completed ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}`}>
+                                  {milestone.completed ? '✓ Complete' : 'Pending'}
+                                </span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </section>
+                )}
+
+                {/* Payment Terms */}
+                {viewingRental.paymentTerms && (
+                  <section className="border-b pb-4">
+                    <h3 className="text-lg font-semibold text-gray-800 mb-3">Payment Terms</h3>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <label className="text-sm font-medium text-gray-600">Total Cost</label>
+                        <p className="text-gray-900 text-xl font-bold">
+                          {viewingRental.paymentTerms.currency || 'ZAR'} {viewingRental.paymentTerms.totalCost?.toLocaleString() || viewingRental.totalAmount?.toLocaleString()}
+                        </p>
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium text-gray-600">Tax Rate (VAT)</label>
+                        <p className="text-gray-900">{viewingRental.paymentTerms.taxRate || 15}%</p>
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium text-gray-600">Deposit Amount</label>
+                        <p className="text-gray-900">
+                          {viewingRental.paymentTerms.depositAmount?.toLocaleString() || '—'}
+                          {viewingRental.paymentTerms.depositPaid && <span className="ml-2 text-green-600 font-medium">✓ Paid</span>}
+                        </p>
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium text-gray-600">Payment Method</label>
+                        <p className="text-gray-900">{viewingRental.paymentTerms.paymentMethod || '—'}</p>
+                      </div>
+                    </div>
+                    <div className="mt-4 space-y-3">
+                      <div>
+                        <label className="text-sm font-medium text-gray-600">Cost Breakdown</label>
+                        <p className="text-gray-900 whitespace-pre-line">{viewingRental.paymentTerms.costBreakdown || '—'}</p>
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium text-gray-600">Payment Schedule</label>
+                        <p className="text-gray-900 whitespace-pre-line">{viewingRental.paymentTerms.paymentSchedule || '—'}</p>
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium text-gray-600">Late Payment Penalty</label>
+                        <p className="text-gray-900">{viewingRental.paymentTerms.latePaymentPenalty || '—'}</p>
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium text-gray-600">Escalation Clause</label>
+                        <p className="text-gray-900 whitespace-pre-line">{viewingRental.paymentTerms.escalationClause || '—'}</p>
+                      </div>
+                      {viewingRental.paymentTerms.invoiceNumbers && viewingRental.paymentTerms.invoiceNumbers.length > 0 && (
+                        <div>
+                          <label className="text-sm font-medium text-gray-600">Invoice Numbers</label>
+                          <p className="text-gray-900 font-mono">{viewingRental.paymentTerms.invoiceNumbers.join(', ')}</p>
+                        </div>
+                      )}
+                      {viewingRental.paymentTerms.paymentIds && viewingRental.paymentTerms.paymentIds.length > 0 && (
+                        <div>
+                          <label className="text-sm font-medium text-gray-600">Payment IDs</label>
+                          <p className="text-gray-900 font-mono">{viewingRental.paymentTerms.paymentIds.join(', ')}</p>
+                        </div>
+                      )}
+                    </div>
+                  </section>
+                )}
+
+                {/* Contract Information */}
+                <section>
+                  <h3 className="text-lg font-semibold text-gray-800 mb-3">Contract Details</h3>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="text-sm font-medium text-gray-600">Start Date</label>
+                      <p className="text-gray-900">{new Date(viewingRental.startDate).toLocaleDateString()}</p>
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-gray-600">End Date</label>
+                      <p className="text-gray-900">{new Date(viewingRental.endDate).toLocaleDateString()}</p>
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-gray-600">Duration</label>
+                      <p className="text-gray-900">{viewingRental.contractDuration} months</p>
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-gray-600">Monthly Rate</label>
+                      <p className="text-gray-900 font-semibold">R{viewingRental.monthlyRate?.toLocaleString()}</p>
+                    </div>
+                  </div>
+                  {viewingRental.notes && (
+                    <div className="mt-4">
+                      <label className="text-sm font-medium text-gray-600">Notes</label>
+                      <p className="text-gray-900 whitespace-pre-line bg-gray-50 p-3 rounded">{viewingRental.notes}</p>
+                    </div>
+                  )}
+                  {viewingRental.contractPDF && (
+                    <div className="mt-4">
+                      <a
+                        href={viewingRental.contractPDF}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition"
+                      >
+                        📄 View Contract PDF
+                      </a>
+                    </div>
+                  )}
+                </section>
+              </div>
+
+              <div className="sticky bottom-0 bg-gray-50 px-6 py-4 border-t flex justify-end">
+                <button
+                  onClick={closeClientDetails}
+                  className="px-6 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition"
+                >
+                  Close
+                </button>
+              </div>
             </div>
           </div>
         )}
