@@ -61,7 +61,7 @@ const BillboardModal = ({ billboard, onClose }) => {
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-75 z-50 flex items-center justify-center p-0 sm:p-4">
-      <div className="relative bg-white rounded-none sm:rounded-lg w-full h-full sm:h-auto sm:max-h-[90vh] sm:max-w-2xl md:max-w-4xl lg:max-w-6xl flex flex-col">
+      <div className="relative bg-white rounded-none sm:rounded-lg w-full h-full sm:h-5/6 sm:max-w-2xl md:max-w-4xl lg:max-w-6xl flex flex-col">
         
         {/* Main Content */}
         <div className="flex-grow flex flex-col md:flex-row overflow-hidden">
