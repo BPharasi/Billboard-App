@@ -60,23 +60,13 @@ const BillboardModal = ({ billboard, onClose }) => {
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-75 z-50 flex items-center justify-center p-2 sm:p-4">
-      <div className="relative bg-white rounded-lg w-full max-w-xs sm:max-w-2xl md:max-w-4xl lg:max-w-6xl h-5/6 flex flex-col">
-        {/* Close Button */}
-        <button
-          onClick={onClose}
-          className="absolute top-2 right-2 sm:top-4 sm:right-4 z-10 bg-white rounded-full p-1.5 sm:p-2 hover:bg-gray-100 transition shadow-lg"
-          aria-label="Close"
-        >
-          <svg className="w-6 h-6 text-gray-800" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-          </svg>
-        </button>
-
+    <div className="fixed inset-0 bg-black bg-opacity-75 z-50 flex items-center justify-center p-0 sm:p-4">
+      <div className="relative bg-white rounded-none sm:rounded-lg w-full h-full sm:h-5/6 sm:max-w-2xl md:max-w-4xl lg:max-w-6xl flex flex-col">
+        
         {/* Main Content */}
         <div className="flex-grow flex flex-col md:flex-row overflow-hidden">
           {/* Image Section with Carousel */}
-          <div className="relative flex-grow bg-gray-100 flex items-center justify-center">
+          <div className="relative flex-shrink-0 h-1/2 md:h-auto md:flex-grow bg-gray-100 flex items-center justify-center">
             {images.length > 0 ? (
               <>
                 <img
@@ -120,9 +110,9 @@ const BillboardModal = ({ billboard, onClose }) => {
               <div className="text-gray-400">No image available</div>
             )}
 
-            {/* Map View - Bottom Right Corner */}
+            {/* Map View - Bottom Right Corner (Hidden on mobile, visible on desktop) */}
             <div 
-              className="absolute bottom-4 right-4 w-64 h-48 rounded-lg overflow-hidden shadow-lg border-2 border-white cursor-pointer group"
+              className="hidden md:block absolute bottom-4 right-4 w-64 h-48 rounded-lg overflow-hidden shadow-lg border-2 border-white cursor-pointer group"
               onClick={openInMaps}
             >
               {/* Overlay hint on hover */}
@@ -166,8 +156,8 @@ const BillboardModal = ({ billboard, onClose }) => {
           </div>
 
           {/* Info Sidebar */}
-          <div className="w-full md:w-72 lg:w-80 bg-white p-4 sm:p-6 overflow-y-auto border-t md:border-t-0 md:border-l border-gray-200">
-            <h2 className="text-xl sm:text-2xl font-bold text-blue-900 mb-3 sm:mb-4">{billboard.name}</h2>
+          <div className="w-full h-1/2 md:h-auto md:w-72 lg:w-80 bg-white p-4 sm:p-6 overflow-y-auto border-t md:border-t-0 md:border-l border-gray-200">
+            <h2 className="text-xl sm:text-2xl font-bold text-blue-900 mb-3 pr-2">{billboard.name}</h2>
             
             {billboard.description && (
               <div className="mb-4">
@@ -194,6 +184,18 @@ const BillboardModal = ({ billboard, onClose }) => {
                     Exact map location not available
                   </p>
                 )}
+                
+                {/* Open in Maps button for mobile */}
+                <button
+                  onClick={openInMaps}
+                  className="md:hidden mt-2 w-full px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition font-medium text-sm flex items-center justify-center"
+                >
+                  <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                  </svg>
+                  Open in Maps
+                </button>
               </div>
             )}
 
