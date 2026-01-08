@@ -153,17 +153,19 @@ const Dashboard = ({ token, setToken }) => {
         formData.append('price', parseFloat(price));
       }
       
-      // Add size if provided
+      // Add size - always send even if empty
       const size = e.target.size.value;
-      if (size) {
-        formData.append('size', size);
-      }
+      formData.append('size', size || '');
       
-      // Add type if provided
+      // Add type - always send even if empty
       const type = e.target.type.value;
-      if (type) {
-        formData.append('type', type);
-      }
+      formData.append('type', type || '');
+
+      console.log('📤 Dashboard - Creating billboard with:', {
+        name: e.target.name.value,
+        size: size,
+        type: type
+      });
       
       // Add location data
       const address = e.target.address.value;

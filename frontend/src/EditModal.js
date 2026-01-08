@@ -71,6 +71,13 @@ const EditModal = ({ billboard, token, onSave, onClose }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
+      console.log('📤 EditModal - Submitting form data:', {
+        name: formData.name,
+        size: formData.size,
+        type: formData.type,
+        price: formData.price
+      });
+
       const submitData = new FormData();
       submitData.append('name', formData.name);
       submitData.append('description', formData.description);
@@ -81,15 +88,14 @@ const EditModal = ({ billboard, token, onSave, onClose }) => {
         submitData.append('price', parseFloat(formData.price));
       }
 
-      // Add size if provided
-      if (formData.size) {
-        submitData.append('size', formData.size);
-      }
+      // Add size - always send, even if empty
+      submitData.append('size', formData.size || '');
 
-      // Add type if provided
-      if (formData.type) {
-        submitData.append('type', formData.type);
-      }
+      // Add type - always send, even if empty
+      submitData.append('type', formData.type || '');
+
+      console.log('📤 Size being sent:', formData.size);
+      console.log('📤 Type being sent:', formData.type);
 
       // Add location data
       if (formData.address) {
