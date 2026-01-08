@@ -96,13 +96,17 @@ function registerRoutes() {
 	app.get('/api/billboards', async (req, res) => {
 		try {
 			const billboards = await Billboard.find({ isVisible: true });
-			console.log('Returning billboards (first one):', billboards[0] ? {
+			console.log('🔍 Returning billboards count:', billboards.length);
+			console.log('🔍 First billboard data:', billboards[0] ? {
 				name: billboards[0].name,
 				size: billboards[0].size,
-				type: billboards[0].type
+				type: billboards[0].type,
+				hasSize: !!billboards[0].size,
+				hasType: !!billboards[0].type
 			} : 'No billboards');
 			res.json(billboards);
 		} catch (err) {
+			console.error('❌ Error fetching billboards:', err);
 			res.status(500).json({ message: 'Server error' });
 		}
 	});
