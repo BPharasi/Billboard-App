@@ -11,6 +11,7 @@ const billboardSchema = new mongoose.Schema({
     description: { type: String },
     location: { type: locationSchema, required: true },
     price: { type: Number, required: false },  // Make optional
+    size: { type: String, required: false },   // Billboard size (e.g., "6m x 3m")
     imagePath: { type: String }, // relative path, e.g., '/uploads/billboard-123.jpg'
     images: [{ type: String }],   // Array of image paths
     isVisible: { type: Boolean, default: true }

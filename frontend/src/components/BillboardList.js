@@ -39,10 +39,10 @@ const BillboardList = () => {
     <div className="min-h-screen bg-gray-50 flex flex-col">
       <Header isAdmin={false} />
 
-      <main className="flex-grow container mx-auto p-6">
-        <div className="mb-8">
-          <h2 className="text-3xl font-bold text-blue-900 mb-2">Available Billboards</h2>
-          <p className="text-gray-600 mb-6">Browse our premium billboard locations across Johannesburg</p>
+      <main className="flex-grow container mx-auto px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
+        <div className="mb-6 sm:mb-8">
+          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-blue-900 mb-2">Available Billboards</h2>
+          <p className="text-sm sm:text-base text-gray-600 mb-4 sm:mb-6">Browse our premium billboard locations across Johannesburg</p>
         </div>
         
         {loading ? (
@@ -56,7 +56,7 @@ const BillboardList = () => {
             <p className="text-gray-500 mt-2">Check back soon for new locations!</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
             {billboards.map((billboard) => (
               <BillboardCard 
                 key={billboard._id} 

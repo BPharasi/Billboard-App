@@ -52,12 +52,12 @@ const BillboardModal = ({ billboard, onClose }) => {
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-75 z-50 flex items-center justify-center p-4">
-      <div className="relative bg-white rounded-lg w-full max-w-6xl h-5/6 flex flex-col">
+    <div className="fixed inset-0 bg-black bg-opacity-75 z-50 flex items-center justify-center p-2 sm:p-4">
+      <div className="relative bg-white rounded-lg w-full max-w-xs sm:max-w-2xl md:max-w-4xl lg:max-w-6xl h-5/6 flex flex-col">
         {/* Close Button */}
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 z-10 bg-white rounded-full p-2 hover:bg-gray-100 transition shadow-lg"
+          className="absolute top-2 right-2 sm:top-4 sm:right-4 z-10 bg-white rounded-full p-1.5 sm:p-2 hover:bg-gray-100 transition shadow-lg"
           aria-label="Close"
         >
           <svg className="w-6 h-6 text-gray-800" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -158,8 +158,8 @@ const BillboardModal = ({ billboard, onClose }) => {
           </div>
 
           {/* Info Sidebar */}
-          <div className="w-full md:w-80 bg-white p-6 overflow-y-auto border-t md:border-t-0 md:border-l border-gray-200">
-            <h2 className="text-2xl font-bold text-blue-900 mb-4">{billboard.name}</h2>
+          <div className="w-full md:w-72 lg:w-80 bg-white p-4 sm:p-6 overflow-y-auto border-t md:border-t-0 md:border-l border-gray-200">
+            <h2 className="text-xl sm:text-2xl font-bold text-blue-900 mb-3 sm:mb-4">{billboard.name}</h2>
             
             {billboard.description && (
               <div className="mb-4">
@@ -186,6 +186,18 @@ const BillboardModal = ({ billboard, onClose }) => {
                     Exact map location not available
                   </p>
                 )}
+              </div>
+            )}
+
+            {billboard.size && (
+              <div className="mb-4">
+                <h3 className="text-sm font-semibold text-gray-700 mb-1">Size</h3>
+                <p className="text-gray-600 flex items-center">
+                  <svg className="w-5 h-5 text-blue-900 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
+                  </svg>
+                  {billboard.size}
+                </p>
               </div>
             )}
 

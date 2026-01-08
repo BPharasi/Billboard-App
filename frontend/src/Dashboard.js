@@ -211,10 +211,10 @@ const Dashboard = ({ token, setToken }) => {
     <div className="min-h-screen bg-gray-50 flex flex-col">
       <Header isAdmin={true} onLogout={handleLogout} />
 
-      <div className="flex-grow container mx-auto p-6">
-        <div className="mb-6">
-          <form onSubmit={handleCreateSubmit} className="max-w-2xl bg-white p-6 rounded-lg shadow-lg border border-gray-200 space-y-4">
-            <h2 className="text-lg font-semibold text-blue-900">Create New Billboard</h2>
+      <div className="flex-grow container mx-auto px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
+        <div className="mb-4 sm:mb-6">
+          <form onSubmit={handleCreateSubmit} className="max-w-2xl bg-white p-4 sm:p-6 rounded-lg shadow-lg border border-gray-200 space-y-3 sm:space-y-4">
+            <h2 className="text-base sm:text-lg font-semibold text-blue-900">Create New Billboard</h2>
 
             <div>
               <label className="block text-sm font-medium text-gray-700">Name</label>
@@ -247,9 +247,9 @@ const Dashboard = ({ token, setToken }) => {
               />
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700">Latitude (optional)</label>
+                <label className="block text-xs sm:text-sm font-medium text-gray-700">Latitude (optional)</label>
                 <input 
                   name="latitude" 
                   type="number" 
@@ -322,21 +322,21 @@ const Dashboard = ({ token, setToken }) => {
           </form>
         </div>
 
-        <div className="bg-white rounded-lg shadow-lg border border-gray-200 overflow-hidden">
-          <table className="table-auto w-full">
+        <div className="bg-white rounded-lg shadow-lg border border-gray-200 overflow-x-auto">
+          <table className="table-auto w-full min-w-[640px]">
             <thead className="bg-blue-900 text-white border-b border-blue-800">
               <tr>
-                <th className="p-3 text-left text-sm font-semibold">Name</th>
-                <th className="p-3 text-left text-sm font-semibold">Location</th>
-                <th className="p-3 text-left text-sm font-semibold">Visible</th>
-                <th className="p-3 text-left text-sm font-semibold">Actions</th>
+                <th className="p-2 sm:p-3 text-left text-xs sm:text-sm font-semibold">Name</th>
+                <th className="p-2 sm:p-3 text-left text-xs sm:text-sm font-semibold hidden sm:table-cell">Location</th>
+                <th className="p-2 sm:p-3 text-left text-xs sm:text-sm font-semibold">Visible</th>
+                <th className="p-2 sm:p-3 text-left text-xs sm:text-sm font-semibold">Actions</th>
               </tr>
             </thead>
             <tbody>
               {billboards.map((b) => (
                 <tr key={b._id} className="hover:bg-blue-50 border-b border-gray-200">
-                  <td className="p-3 text-sm text-gray-800">{b.name}</td>
-                  <td className="p-3 text-sm text-gray-800">{b.location?.address || '—'}</td>
+                  <td className="p-2 sm:p-3 text-xs sm:text-sm text-gray-800">{b.name}</td>
+                  <td className="p-2 sm:p-3 text-xs sm:text-sm text-gray-800 hidden sm:table-cell">{b.location?.address || '—'}</td>
                   <td className="p-3">
                     <label className="relative inline-flex items-center cursor-pointer">
                       <input
@@ -348,9 +348,9 @@ const Dashboard = ({ token, setToken }) => {
                       <div className="w-11 h-6 bg-gray-300 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-blue-600 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
                     </label>
                   </td>
-                  <td className="p-3 space-x-2">
-                    <button onClick={() => openModal(b)} className="px-3 py-1 bg-blue-600 text-white text-sm rounded hover:bg-blue-700 transition font-medium">Edit</button>
-                    <button onClick={() => deleteBillboard(b._id)} className="px-3 py-1 bg-black text-white text-sm rounded hover:bg-gray-800 transition font-medium">Delete</button>
+                  <td className="p-2 sm:p-3 space-x-1 sm:space-x-2">
+                    <button onClick={() => openModal(b)} className="px-2 py-1 sm:px-3 bg-blue-600 text-white text-xs sm:text-sm rounded hover:bg-blue-700 transition font-medium">Edit</button>
+                    <button onClick={() => deleteBillboard(b._id)} className="px-2 py-1 sm:px-3 bg-black text-white text-xs sm:text-sm rounded hover:bg-gray-800 transition font-medium">Delete</button>
                   </td>
                 </tr>
               ))}

@@ -9,13 +9,13 @@ const About = () => {
       <Header isAdmin={false} />
 
       {/* Main Content */}
-      <main className="flex-grow container mx-auto p-6 max-w-4xl">
-        <div className="bg-white rounded-lg shadow-lg border border-gray-200 p-8">
-          <h2 className="text-3xl font-bold text-blue-900 mb-4">About HP Management</h2>
+      <main className="flex-grow container mx-auto px-4 py-6 sm:px-6 sm:py-8 lg:px-8 max-w-5xl">
+        <div className="bg-white rounded-lg shadow-lg border border-gray-200 p-4 sm:p-6 lg:p-8">
+          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-blue-900 mb-4 sm:mb-6">About HP Management</h2>
           
-          <div className="space-y-6 text-gray-700">
+          <div className="space-y-4 sm:space-y-6 text-sm sm:text-base text-gray-700">
             <section>
-              <h3 className="text-xl font-semibold text-blue-900 mb-2">Who We Are</h3>
+              <h3 className="text-lg sm:text-xl font-semibold text-blue-900 mb-2 sm:mb-3">Who We Are</h3>
               <p>
                 HP Management is a leading billboard advertising platform that connects businesses with premium outdoor advertising spaces across the region. We provide a modern, digital solution for managing and booking billboard advertisements.
               </p>

@@ -9,7 +9,7 @@ const BillboardCard = ({ billboard, onClick }) => {
       onClick={onClick}
       className="bg-white rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-shadow cursor-pointer border border-gray-200"
     >
-      <div className="relative h-56 bg-gray-100 overflow-hidden">
+      <div className="relative h-48 sm:h-56 lg:h-64 bg-gray-100 overflow-hidden">
         <img 
           src={mainImage}
           alt={billboard.name}
@@ -28,11 +28,11 @@ const BillboardCard = ({ billboard, onClick }) => {
         )}
       </div>
 
-      <div className="p-4">
-        <h3 className="text-xl font-bold text-blue-900 mb-2">{billboard.name}</h3>
+      <div className="p-3 sm:p-4 lg:p-5">
+        <h3 className="text-lg sm:text-xl font-bold text-blue-900 mb-2">{billboard.name}</h3>
         
         {billboard.description && (
-          <p className="text-gray-600 text-sm mb-3 line-clamp-2">{billboard.description}</p>
+          <p className="text-gray-600 text-xs sm:text-sm mb-2 sm:mb-3 line-clamp-2">{billboard.description}</p>
         )}
 
         {billboard.location?.address && (
