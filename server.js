@@ -152,7 +152,8 @@ function registerRoutes() {
 				console.log('Received billboard data:', { 
 					name: billboardData.name, 
 					price: billboardData.price, 
-					size: billboardData.size 
+					size: billboardData.size,
+					type: billboardData.type
 				});
 				
 				// Parse location if it's a JSON string
@@ -195,7 +196,8 @@ function registerRoutes() {
 				console.log('Updating billboard with data:', { 
 					name: req.body.name, 
 					price: req.body.price, 
-					size: req.body.size 
+					size: req.body.size,
+					type: req.body.type
 				});
 
 				// Update fields
