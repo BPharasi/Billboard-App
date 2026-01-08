@@ -114,16 +114,25 @@ const EditModal = ({ billboard, token, onSave, onClose }) => {
         });
       }
 
-      await axios.put(`/api/admin/billboards/${billboard._id}`, submitData, {
+      console.log('📤 About to send PUT request to:', `/api/admin/billboards/${billboard._id}`);
+      console.log('📤 Token exists:', !!token);
+
+      const response = await axios.put(`/api/admin/billboards/${billboard._id}`, submitData, {
         headers: {
           Authorization: `Bearer ${token}`,
           'Content-Type': 'multipart/form-data'
         }
       });
 
+      console.log('✅ Update successful! Response:', response.data);
+      console.log('✅ Saved size:', response.data.size);
+      console.log('✅ Saved type:', response.data.type);
+
       onSave();
     } catch (err) {
-      console.error('Error updating billboard:', err);
+      console.error('❌ Error updating billboard:', err);
+      console.error('❌ Error response:', err.response?.data);
+      console.error('❌ Error status:', err.response?.status);
       alert('Error updating billboard: ' + (err.response?.data?.error || err.message));
     }
   };
