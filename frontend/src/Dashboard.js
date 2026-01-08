@@ -7,6 +7,7 @@ import Footer from './components/Footer';
 
 const Dashboard = ({ token, setToken }) => {
   const [billboards, setBillboards] = useState([]);
+  const [rentals, setRentals] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedBillboard, setSelectedBillboard] = useState(null);
 
@@ -25,6 +26,7 @@ const Dashboard = ({ token, setToken }) => {
       return;
     }
     fetchBillboards();
+    fetchRentals();
   }, [token, navigate]);
 
   useEffect(() => {
@@ -56,6 +58,32 @@ const Dashboard = ({ token, setToken }) => {
         alert('Error fetching billboards: ' + (err.response?.data?.message || err.message));
       }
     }
+  };
+
+  const fetchRentals = async () => {
+    try {
+      const url = `${API_BASE}/api/admin/rentals`;
+      const res = await axios.get(url, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setRentals(res.data);
+    } catch (err) {
+      console.error('Fetch rentals error:', err);
+    }
+  };
+
+  const isRented = (billboardId) => {
+    return rentals.some(rental => 
+      rental.status === 'active' && 
+      rental.billboard?._id === billboardId
+    );
+  };
+
+  const getRentalInfo = (billboardId) => {
+    return rentals.find(rental => 
+      rental.status === 'active' && 
+      rental.billboard?._id === billboardId
+    );
   };
 
   const toggleVisibility = async (id, currentVisible) => {
@@ -362,15 +390,36 @@ const Dashboard = ({ token, setToken }) => {
               <tr>
                 <th className="p-2 sm:p-3 text-left text-xs sm:text-sm font-semibold">Name</th>
                 <th className="p-2 sm:p-3 text-left text-xs sm:text-sm font-semibold hidden sm:table-cell">Location</th>
+                <th className="p-2 sm:p-3 text-left text-xs sm:text-sm font-semibold">Status</th>
                 <th className="p-2 sm:p-3 text-left text-xs sm:text-sm font-semibold">Visible</th>
                 <th className="p-2 sm:p-3 text-left text-xs sm:text-sm font-semibold">Actions</th>
               </tr>
             </thead>
             <tbody>
-              {billboards.map((b) => (
+              {billboards.map((b) => {
+                const rentalInfo = getRentalInfo(b._id);
+                return (
                 <tr key={b._id} className="hover:bg-blue-50 border-b border-gray-200">
                   <td className="p-2 sm:p-3 text-xs sm:text-sm text-gray-800">{b.name}</td>
                   <td className="p-2 sm:p-3 text-xs sm:text-sm text-gray-800 hidden sm:table-cell">{b.location?.address || '—'}</td>
+                  <td className="p-2 sm:p-3">
+                    {isRented(b._id) ? (
+                      <div>
+                        <span className="inline-flex items-center px-2 py-1 text-xs font-semibold rounded-full bg-orange-100 text-orange-800">
+                          🏢 RENTED
+                        </span>
+                        {rentalInfo && (
+                          <div className="text-xs text-gray-600 mt-1">
+                            {rentalInfo.clientName}
+                          </div>
+                        )}
+                      </div>
+                    ) : (
+                      <span className="inline-flex items-center px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">
+                        ✓ Available
+                      </span>
+                    )}
+                  </td>
                   <td className="p-3">
                     <label className="relative inline-flex items-center cursor-pointer">
                       <input
@@ -387,7 +436,8 @@ const Dashboard = ({ token, setToken }) => {
                     <button onClick={() => deleteBillboard(b._id)} className="px-2 py-1 sm:px-3 bg-black text-white text-xs sm:text-sm rounded hover:bg-gray-800 transition font-medium">Delete</button>
                   </td>
                 </tr>
-              ))}
+                );
+              })}
             </tbody>
           </table>
         </div>

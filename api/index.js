@@ -209,8 +209,17 @@ if (process.env.EMAIL_USER && process.env.EMAIL_PASS) {
 app.get('/api/billboards', async (req, res) => {
   try {
     await connectDB();
+    // Get all visible billboards
     const billboards = await Billboard.find({ isVisible: true });
-    res.json(billboards);
+    
+    // Get all active rentals
+    const activeRentals = await Rental.find({ status: 'active' }).select('billboard');
+    const rentedBillboardIds = activeRentals.map(r => r.billboard.toString());
+    
+    // Filter out billboards that are currently rented
+    const availableBillboards = billboards.filter(b => !rentedBillboardIds.includes(b._id.toString()));
+    
+    res.json(availableBillboards);
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: 'Server error' });
