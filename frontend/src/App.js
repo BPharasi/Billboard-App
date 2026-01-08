@@ -12,6 +12,7 @@ import About from './components/About';
 import ContactUs from './components/ContactUs';
 import LandingPage from './components/LandingPage';
 import BillboardList from './components/BillboardList';
+import RentalManagement from './components/RentalManagement';
 
 // Fix leaflet icon issue
 delete L.Icon.Default.prototype._getIconUrl;
@@ -92,6 +93,7 @@ const AppContent = () => {
           <Route path="/contact" element={<ContactUs />} />
           <Route path="/admin/login" element={<AdminLogin setToken={setToken} />} />
           <Route path="/admin/dashboard" element={<Dashboard token={token} setToken={setToken} />} />
+          <Route path="/admin/rentals" element={<RentalManagement token={token} setToken={setToken} />} />
         </Routes>
       </main>
       <Footer />

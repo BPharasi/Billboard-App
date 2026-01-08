@@ -49,7 +49,10 @@ const Header = ({ isAdmin = false, onLogout = null, token = null, setToken = nul
             )}
             
             {(isAdmin || token) && (
-              <Link to="/admin/dashboard" className="px-3 py-1 hover:bg-blue-50 rounded transition font-medium text-sm">Dashboard</Link>
+              <>
+                <Link to="/admin/dashboard" className="px-3 py-1 hover:bg-blue-50 rounded transition font-medium text-sm">Dashboard</Link>
+                <Link to="/admin/rentals" className="px-3 py-1 hover:bg-blue-50 rounded transition font-medium text-sm">Rentals</Link>
+              </>
             )}
           </nav>
         </div>
@@ -79,6 +82,7 @@ const Header = ({ isAdmin = false, onLogout = null, token = null, setToken = nul
             {(isAdmin || token) && (
               <>
                 <Link to="/admin/dashboard" className="px-3 lg:px-4 py-2 hover:bg-blue-50 rounded transition font-medium text-base lg:text-lg">Dashboard</Link>
+                <Link to="/admin/rentals" className="px-3 lg:px-4 py-2 hover:bg-blue-50 rounded transition font-medium text-base lg:text-lg">Rentals</Link>
                 <button
                   onClick={handleLogout}
                   className="px-3 lg:px-4 py-2 bg-blue-900 text-white rounded hover:bg-blue-800 transition font-medium text-base lg:text-lg"

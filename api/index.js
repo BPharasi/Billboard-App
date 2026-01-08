@@ -76,8 +76,108 @@ const adminSchema = new mongoose.Schema({
   password: { type: String, required: true }
 });
 
+const rentalSchema = new mongoose.Schema({
+  billboard: { 
+    type: mongoose.Schema.Types.ObjectId, 
+    ref: 'Billboard', 
+    required: true 
+  },
+  clientName: { type: String, required: true },
+  clientEmail: { type: String, required: true },
+  clientPhone: String,
+  clientCompany: String,
+  startDate: { type: Date, required: true },
+  endDate: { type: Date, required: true },
+  contractDuration: { type: Number, required: true },
+  monthlyRate: { type: Number, required: true },
+  totalAmount: { type: Number, required: true },
+  contractPDF: String,
+  status: { 
+    type: String, 
+    enum: ['active', 'expired', 'upcoming', 'cancelled'],
+    default: 'active'
+  },
+  remindersSent: [{
+    type: { type: String },
+    sentAt: { type: Date, default: Date.now }
+  }],
+  notes: String
+}, { timestamps: true });
+
+// Virtual fields
+rentalSchema.virtual('daysRemaining').get(function() {
+  const today = new Date();
+  const end = new Date(this.endDate);
+  const diffTime = end - today;
+  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+  return diffDays;
+});
+
+rentalSchema.virtual('monthsRemaining').get(function() {
+  return Math.ceil(this.daysRemaining / 30);
+});
+
+rentalSchema.methods.getPendingReminders = function() {
+  const daysLeft = this.daysRemaining;
+  const monthsLeft = this.monthsRemaining;
+  const duration = this.contractDuration;
+  const sentTypes = this.remindersSent.map(r => r.type);
+  const pending = [];
+
+  const wasReminderSent = (type) => sentTypes.includes(type);
+
+  if (duration === 1) {
+    if (daysLeft <= 7 && daysLeft > 0 && !wasReminderSent('1_week')) {
+      pending.push({ type: '1_week', daysLeft });
+    }
+  } else if (duration === 3) {
+    if (monthsLeft === 2 && !wasReminderSent('2_months')) pending.push({ type: '2_months', daysLeft });
+    if (monthsLeft === 1 && !wasReminderSent('1_month')) pending.push({ type: '1_month', daysLeft });
+    if (daysLeft <= 7 && daysLeft > 0 && !wasReminderSent('1_week')) pending.push({ type: '1_week', daysLeft });
+  } else if (duration === 6) {
+    if (monthsLeft === 3 && !wasReminderSent('3_months')) pending.push({ type: '3_months', daysLeft });
+    if (monthsLeft === 2 && !wasReminderSent('2_months')) pending.push({ type: '2_months', daysLeft });
+    if (monthsLeft === 1 && !wasReminderSent('1_month')) pending.push({ type: '1_month', daysLeft });
+    if (daysLeft <= 7 && daysLeft > 0 && !wasReminderSent('1_week')) pending.push({ type: '1_week', daysLeft });
+  } else if (duration === 12) {
+    if (monthsLeft === 6 && !wasReminderSent('6_months')) pending.push({ type: '6_months', daysLeft });
+    if (monthsLeft === 3 && !wasReminderSent('3_months')) pending.push({ type: '3_months', daysLeft });
+    if (monthsLeft === 2 && !wasReminderSent('2_months')) pending.push({ type: '2_months', daysLeft });
+    if (monthsLeft === 1 && !wasReminderSent('1_month')) pending.push({ type: '1_month', daysLeft });
+    if (daysLeft <= 7 && daysLeft > 0 && !wasReminderSent('1_week')) pending.push({ type: '1_week', daysLeft });
+  } else if (duration === 24) {
+    if (monthsLeft === 12 && !wasReminderSent('12_months')) pending.push({ type: '12_months', daysLeft });
+    if (monthsLeft === 6 && !wasReminderSent('6_months')) pending.push({ type: '6_months', daysLeft });
+    if (monthsLeft === 3 && !wasReminderSent('3_months')) pending.push({ type: '3_months', daysLeft });
+    if (monthsLeft === 2 && !wasReminderSent('2_months')) pending.push({ type: '2_months', daysLeft });
+    if (monthsLeft === 1 && !wasReminderSent('1_month')) pending.push({ type: '1_month', daysLeft });
+    if (daysLeft <= 7 && daysLeft > 0 && !wasReminderSent('1_week')) pending.push({ type: '1_week', daysLeft });
+  } else if (duration === 60) {
+    if (monthsLeft === 48 && !wasReminderSent('48_months')) pending.push({ type: '48_months', daysLeft });
+    if (monthsLeft === 36 && !wasReminderSent('36_months')) pending.push({ type: '36_months', daysLeft });
+    if (monthsLeft === 24 && !wasReminderSent('24_months')) pending.push({ type: '24_months', daysLeft });
+    if (monthsLeft === 12 && !wasReminderSent('12_months')) pending.push({ type: '12_months', daysLeft });
+    if (monthsLeft === 6 && !wasReminderSent('6_months')) pending.push({ type: '6_months', daysLeft });
+    if (monthsLeft === 3 && !wasReminderSent('3_months')) pending.push({ type: '3_months', daysLeft });
+    if (monthsLeft === 2 && !wasReminderSent('2_months')) pending.push({ type: '2_months', daysLeft });
+    if (monthsLeft === 1 && !wasReminderSent('1_month')) pending.push({ type: '1_month', daysLeft });
+    if (daysLeft <= 7 && daysLeft > 0 && !wasReminderSent('1_week')) pending.push({ type: '1_week', daysLeft });
+  }
+
+  return pending;
+};
+
+rentalSchema.methods.markReminderSent = function(reminderType) {
+  this.remindersSent.push({ type: reminderType });
+  return this.save();
+};
+
+rentalSchema.set('toJSON', { virtuals: true });
+rentalSchema.set('toObject', { virtuals: true });
+
 const Billboard = mongoose.models.Billboard || mongoose.model('Billboard', billboardSchema);
 const Admin = mongoose.models.Admin || mongoose.model('Admin', adminSchema);
+const Rental = mongoose.models.Rental || mongoose.model('Rental', rentalSchema);
 
 // Auth middleware
 const verifyToken = (req, res, next) => {
@@ -249,6 +349,188 @@ app.post('/api/contact', async (req, res) => {
       success: true, 
       message: 'Thank you! We\'ll contact you at ' + email + ' soon.' 
     });
+  }
+});
+
+// Rental Management Routes
+app.get('/api/admin/rentals', verifyToken, async (req, res) => {
+  try {
+    await connectDB();
+    const rentals = await Rental.find().populate('billboard').sort({ createdAt: -1 });
+    res.json(rentals);
+  } catch (err) {
+    console.error('Error fetching rentals:', err);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+app.post('/api/admin/rentals', verifyToken, upload.single('contractPDF'), async (req, res) => {
+  try {
+    await connectDB();
+    
+    const rentalData = {
+      billboard: req.body.billboard,
+      clientName: req.body.clientName,
+      clientEmail: req.body.clientEmail,
+      clientPhone: req.body.clientPhone || '',
+      clientCompany: req.body.clientCompany || '',
+      startDate: req.body.startDate,
+      endDate: req.body.endDate,
+      contractDuration: req.body.contractDuration,
+      monthlyRate: req.body.monthlyRate,
+      totalAmount: req.body.totalAmount,
+      status: req.body.status || 'active',
+      notes: req.body.notes || ''
+    };
+
+    if (req.file) {
+      rentalData.contractPDF = req.file.path;
+    }
+
+    const rental = new Rental(rentalData);
+    await rental.save();
+    
+    const populatedRental = await Rental.findById(rental._id).populate('billboard');
+    res.json(populatedRental);
+  } catch (err) {
+    console.error('Error creating rental:', err);
+    res.status(500).json({ error: 'Server error', details: err.message });
+  }
+});
+
+app.put('/api/admin/rentals/:id', verifyToken, upload.single('contractPDF'), async (req, res) => {
+  try {
+    await connectDB();
+    const rental = await Rental.findById(req.params.id);
+    if (!rental) return res.status(404).json({ error: 'Rental not found' });
+
+    Object.keys(req.body).forEach(key => {
+      if (req.body[key] !== undefined && key !== '_id') {
+        rental[key] = req.body[key];
+      }
+    });
+
+    if (req.file) {
+      rental.contractPDF = req.file.path;
+    }
+
+    await rental.save();
+    const populatedRental = await Rental.findById(rental._id).populate('billboard');
+    res.json(populatedRental);
+  } catch (e) {
+    console.error('Error updating rental:', e);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+app.delete('/api/admin/rentals/:id', verifyToken, async (req, res) => {
+  try {
+    await connectDB();
+    await Rental.findByIdAndDelete(req.params.id);
+    res.json({ message: 'Rental deleted' });
+  } catch (err) {
+    console.error('Error deleting rental:', err);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// Helper function to send rental reminder email
+async function sendRentalReminder(rental, reminderType) {
+  if (!transporter) {
+    console.log('⚠️ Email service not configured for reminders');
+    return;
+  }
+
+  const reminderDisplay = reminderType
+    .replace('_', ' ')
+    .replace('months', 'months left')
+    .replace('month', 'month left')
+    .replace('week', 'week left');
+
+  const mailOptions = {
+    from: process.env.EMAIL_USER,
+    to: process.env.CONTACT_EMAIL || 'info@hermpo.com',
+    subject: `🔔 Rental Expiring: ${rental.billboard?.name || 'Billboard'} - ${reminderDisplay}`,
+    html: `
+      <h2>🔔 Rental Contract Expiration Reminder</h2>
+      <p><strong>Alert:</strong> ${reminderDisplay.toUpperCase()}</p>
+      <hr>
+      <h3>Billboard Details:</h3>
+      <p><strong>Name:</strong> ${rental.billboard?.name || 'N/A'}</p>
+      <p><strong>Location:</strong> ${rental.billboard?.location?.address || 'N/A'}</p>
+      <p><strong>Size:</strong> ${rental.billboard?.size || 'N/A'}</p>
+      <p><strong>Type:</strong> ${rental.billboard?.type || 'N/A'}</p>
+      
+      <h3>Client Information:</h3>
+      <p><strong>Name:</strong> ${rental.clientName}</p>
+      <p><strong>Email:</strong> ${rental.clientEmail}</p>
+      ${rental.clientPhone ? `<p><strong>Phone:</strong> ${rental.clientPhone}</p>` : ''}
+      ${rental.clientCompany ? `<p><strong>Company:</strong> ${rental.clientCompany}</p>` : ''}
+      
+      <h3>Contract Details:</h3>
+      <p><strong>Start Date:</strong> ${new Date(rental.startDate).toLocaleDateString()}</p>
+      <p><strong>End Date:</strong> ${new Date(rental.endDate).toLocaleDateString()}</p>
+      <p><strong>Duration:</strong> ${rental.contractDuration} months</p>
+      <p><strong>Days Remaining:</strong> <span style="color: ${rental.daysRemaining <= 7 ? 'red' : 'orange'}; font-weight: bold;">${rental.daysRemaining} days</span></p>
+      <p><strong>Monthly Rate:</strong> R${rental.monthlyRate.toLocaleString()}</p>
+      <p><strong>Total Amount:</strong> R${rental.totalAmount.toLocaleString()}</p>
+      
+      ${rental.notes ? `
+      <h3>Notes:</h3>
+      <p>${rental.notes.replace(/\n/g, '<br>')}</p>
+      ` : ''}
+      
+      <hr>
+      <p style="color: #666; font-size: 12px;">
+        This is an automated reminder. Please contact the client to discuss contract renewal.
+      </p>
+    `
+  };
+
+  await transporter.sendMail(mailOptions);
+}
+
+// Check and send rental reminders
+app.post('/api/admin/rentals/check-reminders', verifyToken, async (req, res) => {
+  try {
+    await connectDB();
+    const rentals = await Rental.find({ status: 'active' }).populate('billboard');
+    const results = { sent: [], pending: [], errors: [] };
+
+    for (const rental of rentals) {
+      const pendingReminders = rental.getPendingReminders();
+      
+      for (const reminder of pendingReminders) {
+        try {
+          await sendRentalReminder(rental, reminder.type);
+          await rental.markReminderSent(reminder.type);
+          results.sent.push({
+            rentalId: rental._id,
+            clientName: rental.clientName,
+            billboard: rental.billboard?.name,
+            reminderType: reminder.type,
+            daysLeft: reminder.daysLeft
+          });
+          console.log(`✅ Sent ${reminder.type} reminder for ${rental.clientName}`);
+        } catch (err) {
+          console.error(`Failed to send reminder for rental ${rental._id}:`, err);
+          results.errors.push({
+            rentalId: rental._id,
+            error: err.message
+          });
+        }
+      }
+    }
+
+    res.json({
+      message: 'Reminder check complete',
+      totalSent: results.sent.length,
+      totalErrors: results.errors.length,
+      results
+    });
+  } catch (err) {
+    console.error('Error checking reminders:', err);
+    res.status(500).json({ error: 'Server error' });
   }
 });
 

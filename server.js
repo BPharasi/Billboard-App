@@ -11,10 +11,11 @@ const helmet = require('helmet');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const rateLimit = require('express-rate-limit');
-const { sendContactEmail } = require('./services/emailService');
+const { sendContactEmail, sendRentalReminder } = require('./services/emailService');
 
 let Billboard;
 let Admin;
+let Rental;
 
 const connectDB = require('./db');
 const seedBillboards = require('./seed');
@@ -326,6 +327,125 @@ function registerRoutes() {
 		}
 	});
 
+	// Rental Management Routes
+	app.get('/api/admin/rentals', verifyToken, async (req, res) => {
+		try {
+			const rentals = await Rental.find().populate('billboard').sort({ createdAt: -1 });
+			res.json(rentals);
+		} catch (err) {
+			console.error('Error fetching rentals:', err);
+			res.status(500).json({ error: 'Server error' });
+		}
+	});
+
+	app.post('/api/admin/rentals', verifyToken, upload.single('contractPDF'), async (req, res) => {
+		try {
+			const rentalData = {
+				billboard: req.body.billboard,
+				clientName: req.body.clientName,
+				clientEmail: req.body.clientEmail,
+				clientPhone: req.body.clientPhone || '',
+				clientCompany: req.body.clientCompany || '',
+				startDate: req.body.startDate,
+				endDate: req.body.endDate,
+				contractDuration: req.body.contractDuration,
+				monthlyRate: req.body.monthlyRate,
+				totalAmount: req.body.totalAmount,
+				status: req.body.status || 'active',
+				notes: req.body.notes || ''
+			};
+
+			if (req.file) {
+				rentalData.contractPDF = req.file.path;
+			}
+
+			const rental = new Rental(rentalData);
+			await rental.save();
+			
+			const populatedRental = await Rental.findById(rental._id).populate('billboard');
+			res.json(populatedRental);
+		} catch (err) {
+			console.error('Error creating rental:', err);
+			res.status(500).json({ error: 'Server error', details: err.message });
+		}
+	});
+
+	app.put('/api/admin/rentals/:id', verifyToken, upload.single('contractPDF'), async (req, res) => {
+		try {
+			const rental = await Rental.findById(req.params.id);
+			if (!rental) return res.status(404).json({ error: 'Rental not found' });
+
+			Object.keys(req.body).forEach(key => {
+				if (req.body[key] !== undefined && key !== '_id') {
+					rental[key] = req.body[key];
+				}
+			});
+
+			if (req.file) {
+				rental.contractPDF = req.file.path;
+			}
+
+			await rental.save();
+			const populatedRental = await Rental.findById(rental._id).populate('billboard');
+			res.json(populatedRental);
+		} catch (e) {
+			console.error('Error updating rental:', e);
+			res.status(500).json({ error: 'Server error' });
+		}
+	});
+
+	app.delete('/api/admin/rentals/:id', verifyToken, async (req, res) => {
+		try {
+			await Rental.findByIdAndDelete(req.params.id);
+			res.json({ message: 'Rental deleted' });
+		} catch (err) {
+			console.error('Error deleting rental:', err);
+			res.status(500).json({ error: 'Server error' });
+		}
+	});
+
+	// Check and send rental reminders
+	app.post('/api/admin/rentals/check-reminders', verifyToken, async (req, res) => {
+		try {
+			const rentals = await Rental.find({ status: 'active' }).populate('billboard');
+			const results = { sent: [], pending: [], errors: [] };
+
+			for (const rental of rentals) {
+				const pendingReminders = rental.getPendingReminders();
+				
+				for (const reminder of pendingReminders) {
+					try {
+						await sendRentalReminder(rental, reminder.type);
+						await rental.markReminderSent(reminder.type);
+						results.sent.push({
+							rentaId: rental._id,
+							clientName: rental.clientName,
+							billboard: rental.billboard?.name,
+							reminderType: reminder.type,
+							daysLeft: reminder.daysLeft
+						});
+					} catch (err) {
+						console.error(`Failed to send reminder for rental ${rental._id}:`, err);
+						results.errors.push({
+							rentalId: rental._id,
+							error: err.message
+						});
+					}
+				}
+			}
+
+			res.json({
+				message: 'Reminder check complete',
+				totalSent: results.sent.length,
+				totalErrors: results.errors.length,
+				results
+			});
+		} catch (err) {
+			console.error('Error checking reminders:', err);
+			res.status(500).json({ error: 'Server error' });
+		}
+	});
+
 	// Error handler
 	app.use((err, req, res, next) => {
 		if (err && (err.code === 'LIMIT_FILE_SIZE' || err.message === 'File too large')) {
@@ -367,6 +487,7 @@ connectDB()
 	.then(async () => {
 		Billboard = require('./models/Billboard');
 		Admin = require('./models/Admin');
+		Rental = require('./models/Rental');
 
 		registerRoutes();
 
