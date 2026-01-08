@@ -908,14 +908,34 @@ const RentalManagement = ({ token, setToken }) => {
         {isClientDetailsOpen && viewingRental && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
             <div className="bg-white rounded-lg shadow-xl w-full max-w-4xl max-h-[90vh] overflow-y-auto">
-              <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex justify-between items-center">
-                <h2 className="text-2xl font-bold text-blue-900">Client & Contract Details</h2>
-                <button
-                  onClick={closeClientDetails}
-                  className="text-gray-500 hover:text-gray-700 text-2xl"
-                >
-                  ×
-                </button>
+              <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 z-10">
+                <div className="flex justify-between items-start">
+                  <div>
+                    <h2 className="text-2xl font-bold text-blue-900">Client & Contract Details</h2>
+                    <p className="text-sm text-gray-600 mt-1">{viewingRental.clientName} • {viewingRental.billboard?.name}</p>
+                  </div>
+                  <div className="flex items-center space-x-3">
+                    {viewingRental.contractPDF && (
+                      <a
+                        href={viewingRental.contractPDF}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition shadow-sm"
+                      >
+                        <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                        </svg>
+                        View Contract
+                      </a>
+                    )}
+                    <button
+                      onClick={closeClientDetails}
+                      className="text-gray-500 hover:text-gray-700 text-2xl leading-none"
+                    >
+                      ×
+                    </button>
+                  </div>
+                </div>
               </div>
 
               <div className="p-6 space-y-6">
